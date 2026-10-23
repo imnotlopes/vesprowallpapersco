@@ -1,0 +1,26 @@
+---
+const faq = [
+  { q: 'How do I get my wallpapers?', a: 'Right after checkout we email you the download links. No account, no waiting, no shipping. These are digital files for your screens.' },
+  { q: 'Will they work on my phone and computer?', a: 'Yes. Desktop versions are 4K (3840 × 2160) for Mac, Windows PCs, laptops and monitors, and they look great on phone lock screens too.' },
+  { q: 'Is this a one-time payment or a subscription?', a: 'One-time payment. Buy a collection, or VESPRO™ Editions with everything, and keep it for life.' },
+  { q: 'Can I try before I buy?', a: 'Yes. VESPRO™ First Strokes gives you 12 free wallpapers in full resolution, delivered to your inbox.' },
+  { q: 'What if I don\'t like them?', a: 'Email us within 14 days and we\'ll refund your purchase in full.' },
+  { q: 'Can I use them commercially?', a: 'The standard license is for your own devices. For products, stores or apps, ask us about a commercial license.' },
+];
+---
+<section class="section">
+  <div class="wrap faqw">
+    <h2 class="center">Still have <em class="serif">questions?</em></h2>
+    {faq.map((f) => (<details class="faqi"><summary>{f.q}</summary><p>{f.a}</p></details>))}
+  </div>
+</section>
+<style>
+  .faqw { max-width: 780px; }
+  .faqi { border-radius: 14px; margin-bottom: 10px; background: rgba(11,17,24,.6); box-shadow: inset 0 0 0 1px var(--line); }
+  .faqi[open] { box-shadow: inset 0 0 0 1px rgba(217,184,120,.5); }
+  .faqi summary { cursor: pointer; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 18px 22px; min-height: 56px; }
+  .faqi summary::after { content: '+'; color: var(--muted); font-size: 1.3rem; line-height: 1; transition: transform .2s; }
+  .faqi[open] summary::after { transform: rotate(45deg); color: var(--gold); }
+  .faqi summary::-webkit-details-marker { display: none; }
+  .faqi p { margin: 0; padding: 0 22px 18px; }
+</style>

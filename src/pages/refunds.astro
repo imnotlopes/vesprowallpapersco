@@ -1,0 +1,9 @@
+---
+import Legal from '../components/Legal.astro';
+import { PAGES } from '../data/pages';
+import { SITE } from '../config';
+---
+<Legal page={PAGES.refunds} heading="Refund policy" updated="October 2026">
+  <p>If your download doesn't work, or the wallpapers aren't what you expected, email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> within 14 days of purchase with your order email and we'll refund you in full.</p>
+  <p>Refunds are sent to the original payment method. Processing times depend on your bank.</p>
+</Legal>

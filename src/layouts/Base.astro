@@ -1,0 +1,83 @@
+---
+// Layout base: SEO completo (title, description, canonical, robots, Open Graph, JSON-LD),
+// fontes sem bloquear a tela, pixel do Meta, Microsoft Clarity e rastreamento do funil (/js/track.js).
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Cart from '../components/Cart.astro';
+import { SITE } from '../config';
+import type { PageMeta } from '../data/pages';
+import { WALLPAPERS, preview } from '../data/wallpapers';
+
+interface Props {
+  page: PageMeta;
+  image?: string;
+  pageType?: string;          // vai para o Clarity e para os eventos do funil (home, hub, catalog, legal…)
+  jsonLd?: Record<string, unknown>[];
+  footerNote?: string;
+  floaters?: boolean;         // telas flutuantes nas margens (public/js/floaters.js)
+}
+const { page, image = SITE.ogImage, pageType = 'page', jsonLd = [], footerNote, floaters = true } = Astro.props;
+const floatImgs = floaters ? JSON.stringify(WALLPAPERS.map((w) => preview(w, 400))) : '';
+const canonical = new URL(page.path, SITE.url).href.replace(/\/$/, page.path === '/' ? '/' : '');
+const ogImage = new URL(image, SITE.url).href;
+const FONTS = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap';
+const ld = [
+  { '@context': 'https://schema.org', '@type': 'Organization', name: SITE.name, url: SITE.url, logo: new URL('/img/brand/icon-512.png', SITE.url).href, email: SITE.email, sameAs: [SITE.instagram.url] },
+  ...(page.path === '/' ? [{ '@context': 'https://schema.org', '@type': 'WebSite', name: SITE.name, url: SITE.url }] : []),
+  ...jsonLd,
+];
+---
+<!doctype html>
+<html lang={SITE.locale}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="preconnect" href="https://connect.facebook.net" />
+  <link rel="preconnect" href="https://www.clarity.ms" />
+  <script is:inline define:vars={{ pixelId: SITE.metaPixelId, clarityId: SITE.clarityId, pageType }}>
+    window.VESPRO = { pixelId, clarityId, pageType };
+    if (pixelId) {
+      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', pixelId); fbq('track', 'PageView');
+    }
+    if (clarityId) {
+      (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,'clarity','script',clarityId);
+      window.clarity('set', 'site', 'brand');
+      window.clarity('set', 'page_type', pageType);
+    }
+  </script>
+  <title>{page.title}</title>
+  <meta name="description" content={page.description} />
+  <link rel="canonical" href={canonical} />
+  <meta name="robots" content={page.indexable ? 'index,follow,max-image-preview:large' : 'noindex,follow'} />
+  <meta name="theme-color" content="#060a10" />
+  <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/img/brand/favicon-32.png" />
+  <link rel="apple-touch-icon" href="/img/brand/apple-touch-icon.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={SITE.name} />
+  <meta property="og:title" content={page.title} />
+  <meta property="og:description" content={page.description} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={ogImage} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="preload" as="style" href={FONTS} />
+  <link rel="stylesheet" href={FONTS} media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href={FONTS} /></noscript>
+  {ld.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+</head>
+<body data-page-type={pageType}>
+  <Header />
+  <main>
+    {floaters && <div class="flt" aria-hidden="true" data-floaters={floatImgs}></div>}
+    <slot />
+  </main>
+  <Footer note={footerNote} />
+  <Cart />
+  <script is:inline src="/js/track.js" defer></script>
+  <script is:inline src="/js/cart.js" defer></script>
+  <script is:inline src="/js/nav.js" defer></script>
+  {floaters && <script is:inline src="/js/floaters.js" defer></script>}
+</body>
+</html>

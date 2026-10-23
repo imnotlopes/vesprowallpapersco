@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import type { PageMeta } from '../data/pages';
+interface Props { page: PageMeta; heading: string; updated: string; }
+const { page, heading, updated } = Astro.props;
+---
+<Base page={page} pageType="legal">
+  <article class="section">
+    <div class="wrap legal">
+      <h1 style="font-size:clamp(2rem,5vw,3rem)">{heading}</h1>
+      <p class="muted">Last updated: {updated}</p>
+      <slot />
+    </div>
+  </article>
+</Base>
+<style>
+  .legal { max-width: 760px; }
+  .legal :global(h2) { font-size: 1.35rem; margin-top: 2em; }
+  .legal :global(li) { color: var(--soft); margin-bottom: .4em; }
+</style>

@@ -1,0 +1,26 @@
+---
+// Grade de obras com link para a página de cada uma (/wallpaper/[slug]).
+import type { Wallpaper } from '../data/wallpapers';
+import { preview } from '../data/wallpapers';
+interface Props { items: Wallpaper[]; eager?: number; }
+const { items, eager = 0 } = Astro.props;
+---
+<ul class="wg">
+  {items.map((w, i) => (
+    <li>
+      <a href={`/wallpaper/${w.slug}`} class="wg__a">
+        <img src={preview(w, 400)} srcset={`${preview(w, 400)} 400w, ${preview(w, 800)} 800w`} sizes="(min-width: 720px) 360px, 92vw"
+          alt={`${w.title}, oil painting wallpaper`} width="400" height="225" loading={i < eager ? 'eager' : 'lazy'} decoding="async" />
+        <span>{w.title}</span>
+      </a>
+    </li>
+  ))}
+</ul>
+<style>
+  .wg { list-style: none; padding: 0; margin: 0; display: grid; gap: 18px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .wg__a { display: flex; flex-direction: column; gap: 8px; text-decoration: none; }
+  .wg__a img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 18px 40px -18px rgba(0,0,0,.7); transition: transform .2s; }
+  .wg__a:hover img { transform: translateY(-2px); }
+  .wg__a span { font-size: .92rem; color: var(--soft); }
+  .wg__a:hover span { color: var(--gold); }
+</style>

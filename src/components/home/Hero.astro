@@ -1,0 +1,82 @@
+---
+// Hero no estilo do site BR: título no topo, carrossel de notebook + celular no centro, subtítulo e botões embaixo, telas flutuantes em volta.
+// O celular mostra a mesma pintura recortada na vertical (o catálogo ainda não tem versões de celular).
+import { WALLPAPERS, preview, EDITIONS_LABEL } from '../../data/wallpapers';
+const pick = (slugs: string[]) => slugs.map((s) => WALLPAPERS.find((w) => w.slug === s)!).filter(Boolean);
+const pairs = pick(['new-york-skyline-toast', 'tall-ship-open-sea', 'havana-classic-cars', 'snow-angel', 'galloping-horses', 'superyacht-sunset',
+  'couple-walking-in-the-rain', 'surfer-giant-wave', 'lion-cub-classic-car', 'baroque-church-european-street']);
+const floats = pick(['shark-school-of-fish', 'lake-house-golden-hour', 'skiers-snowy-mountain', 'dog-in-the-clouds',
+  'white-lion-black-car', 'helicopter-rescue-sea', 'rustic-kitchen-dusk', 'shaka-rainbow-sea']);
+// Como no site BR: grandes nos cantos de cima, menores embaixo e duas saindo de trás dos aparelhos
+const FL = [
+  'left:-3%;top:12%;--rot:-10deg;--w:190px', 'right:-3%;top:14%;--rot:9deg;--w:200px',
+  'left:4%;bottom:12%;--rot:7deg;--w:180px', 'right:4%;bottom:14%;--rot:-6deg;--w:180px',
+  'right:calc(50% + 300px);bottom:2%;--rot:4deg;--w:115px', 'left:calc(50% + 280px);bottom:3%;--rot:-7deg;--w:110px',
+  'right:calc(50% + 330px);top:57%;--rot:-4deg;--w:120px', 'left:calc(50% + 200px);top:58%;--rot:5deg;--w:115px',
+];
+---
+<section class="hero" data-floaters-skip>
+  {floats.map((w, i) => (
+    <div class="hero__fl" aria-hidden="true" style={`${FL[i]};animation-delay:${-i * 1.7}s`}>
+      <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />
+    </div>
+  ))}
+  <div class="wrap hero__head">
+    <h1>Turn your screen into a <em class="serif">painting</em></h1>
+  </div>
+  <div class="hero__rail" aria-hidden="true">
+    <div class="marquee" data-marquee="60">
+      <div class="marquee__track">
+        {[0, 1].map((copy) => pairs.map((w, i) => (
+          <div class="dev">
+            <div class="dev__laptop">
+              <div class="dev__screen"><img src={preview(w, 800)} alt="" width="800" height="450" loading={copy === 0 && i < 3 ? 'eager' : 'lazy'} decoding="async" /></div>
+              <div class="dev__base"></div>
+            </div>
+            <div class="dev__phone"><img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" /></div>
+          </div>
+        )))}
+      </div>
+    </div>
+  </div>
+  <div class="wrap hero__sub">
+    <p class="lead">{EDITIONS_LABEL} impasto oil painting wallpapers, made to look stunning on your laptop, desktop and phone.<br />
+      Texture, brushstrokes and color that make your screen feel brand new.</p>
+    <div class="hero__cta">
+      <a class="btn" href="/wallpapers" data-track="ClickBrowse">Browse wallpapers</a>
+      <a class="btn btn--ghost" href="/free-4k-wallpapers" data-track="ClickFreePack">Get 12 free</a>
+    </div>
+    <p class="hero__note">Instant download · Mac, Windows, iPhone &amp; Android · one-time payment</p>
+  </div>
+</section>
+
+<style>
+  .hero { position: relative; overflow: hidden; padding: 64px 0 56px; }
+  .hero__head { position: relative; z-index: 2; text-align: center; }
+  .hero__head::before { content: ''; position: absolute; left: 50%; top: -40px; width: 140%; height: 260px; transform: translateX(-50%); z-index: -1;
+    background: radial-gradient(ellipse at center, hsl(214 60% 28% / .4), transparent 65%); filter: blur(20px); }
+  .hero__head h1 { font-size: clamp(2.6rem, 8vw, 6rem); letter-spacing: -0.03em; max-width: 14ch; margin-inline: auto; }
+  .hero__sub { position: relative; z-index: 2; text-align: center; margin-top: 44px; }
+  .hero__sub .lead { margin-inline: auto; font-size: 1.08rem; color: var(--fg); }
+  .hero__note { margin: 22px 0 0; font-size: .85rem; color: var(--muted); }
+  .hero__cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+  .hero__fl { position: absolute; width: var(--w); opacity: .55; z-index: 1; pointer-events: none; animation: drift 6.5s ease-in-out infinite; }
+  .hero__fl img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 12px; box-shadow: 0 0 0 1px rgba(255,255,255,.2), 0 25px 50px -12px rgba(0,0,0,.6); }
+  @keyframes drift {
+    0%, 100% { transform: rotate(var(--rot)) translate3d(0, 0, 0); }
+    50% { transform: rotate(calc(var(--rot) + 2deg)) translate3d(8px, -22px, 0); }
+  }
+  .hero__rail { position: relative; z-index: 2; margin-top: 40px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+  .dev { display: flex; align-items: flex-end; margin-right: 56px; flex-shrink: 0; }
+  .dev__laptop { flex-shrink: 0; }
+  .dev__screen { background: #18181b; padding: 7px 7px 4px; border-radius: 12px 12px 0 0; box-shadow: 0 0 0 1px rgba(255,255,255,.2), 0 25px 50px -12px rgba(0,0,0,.5); }
+  .dev__screen img { width: 380px; aspect-ratio: 16/10; object-fit: cover; border-radius: 6px 6px 0 0; display: block; }
+  .dev__base { height: 10px; margin: 0 -14px; background: #27272a; border-radius: 0 0 10px 10px; box-shadow: 0 0 0 1px rgba(255,255,255,.15); }
+  .dev__phone { position: relative; z-index: 2; margin-left: -48px; padding: 5px; background: #18181b; border-radius: 20px; box-shadow: 0 0 0 1px rgba(255,255,255,.25), 0 20px 25px -5px rgba(0,0,0,.6); }
+  .dev__phone img { width: 92px; aspect-ratio: 9/19; object-fit: cover; border-radius: 15px; display: block; }
+  .hero__fl:nth-of-type(n+3) { display: none; }
+  @media (min-width: 900px) { .hero__fl:nth-of-type(n+3) { display: block; } }
+  @media (max-width: 640px) { .hero { padding-top: 48px; } .dev__screen img { width: 240px; } .dev__phone img { width: 58px; } .dev { margin-right: 36px; } .hero__fl { --w: 120px !important; opacity: .4; } }
+  @media (prefers-reduced-motion: reduce) { .hero__fl { animation: none; } }
+</style>

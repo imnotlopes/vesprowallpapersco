@@ -1,0 +1,43 @@
+---
+import { FOOTER, SITE } from '../config';
+const { note } = Astro.props as { note?: string };   // aviso específico da página (ex.: tradução das conversas na home)
+const year = new Date().getFullYear();
+---
+<footer class="ftr">
+  <div class="wrap ftr__in">
+    <div class="ftr__brand">
+      <img src="/img/brand/vespro-logo-240.webp" alt="VESPRO" width="240" height="212" loading="lazy" />
+      <p class="muted">Impasto oil painting wallpapers in 4K.<br />Questions? <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      <a class="ftr__social" href={SITE.instagram.url} target="_blank" rel="noopener" aria-label={`VESPRO on Instagram, ${SITE.instagram.handle}`}>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>
+        <span>{SITE.instagram.handle}</span>
+      </a>
+    </div>
+    {FOOTER.map((col) => (
+      <div>
+        <p class="ftr__title">{col.title}</p>
+        <ul>{col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+      </div>
+    ))}
+  </div>
+  <p class="wrap ftr__legal muted">
+    © {year} VESPRO™. Previews are watermarked and downscaled; full-resolution files are delivered after download or purchase.
+    Personal use only. Commercial licenses available.
+  </p>
+  {note && <p class="wrap ftr__legal muted" style="margin-top:8px">{note}</p>}
+</footer>
+
+<style>
+  .ftr { border-top: 1px solid var(--line); padding: 48px 0 28px; margin-top: 40px; }
+  .ftr__in { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; }
+  .ftr__brand img { height: 64px; width: auto; margin-bottom: 12px; opacity: 0.92; }
+  .ftr__title { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
+  .ftr ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .ftr a { color: var(--soft); text-decoration: none; font-size: 0.9rem; }
+  .ftr a:hover { color: var(--gold); }
+  .ftr__legal { font-size: 0.78rem; margin-top: 32px; }
+  .ftr__social { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; min-height: 44px; padding: 8px 16px 8px 12px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+  .ftr__social:hover { box-shadow: inset 0 0 0 1px var(--gold); }
+  @media (max-width: 720px) { .ftr__in { grid-template-columns: 1fr 1fr; } .ftr__brand { grid-column: 1 / -1; } }
+</style>

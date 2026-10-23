@@ -1,0 +1,18 @@
+---
+import Legal from '../components/Legal.astro';
+import { PAGES } from '../data/pages';
+import { SITE } from '../config';
+---
+<Legal page={PAGES.privacy} heading="Privacy policy" updated="October 2026">
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Email address:</strong> when you request the free pack or buy, so we can deliver your files and resend your links.</li>
+    <li><strong>Marketing emails:</strong> only if you tick the separate box to receive new releases (in the free pack form or the cart). That box also lets us send one reminder if you leave checkout unfinished. You can unsubscribe at any time.</li>
+    <li><strong>Your cart:</strong> the collections you add are kept in your own browser until you check out or remove them.</li>
+    <li><strong>Payment details:</strong> handled by Stripe. We never see or store your card number.</li>
+    <li><strong>Email delivery:</strong> our emails are sent through Klaviyo, which stores your email address and the files you requested or bought.</li>
+    <li><strong>Usage data:</strong> Meta Pixel and Microsoft Clarity measure visits, clicks and how pages are used, so we can improve the site and our ads.</li>
+  </ul>
+  <h2>Your choices</h2>
+  <p>You can ask us to access, correct or delete your data at <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+</Legal>

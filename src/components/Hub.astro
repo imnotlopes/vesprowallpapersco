@@ -1,0 +1,81 @@
+---
+// Página-hub (nicho, aparelho ou catálogo): cabeçalho, grade de obras reais (ou prévias de amostra
+// enquanto o formato não existe no catálogo), texto original, FAQ e links internos.
+import Base from '../layouts/Base.astro';
+import WallGrid from './WallGrid.astro';
+import type { PageMeta } from '../data/pages';
+import { PAGES } from '../data/pages';
+import type { Wallpaper } from '../data/wallpapers';
+import { THEMES, themeIndexable } from '../data/wallpapers';
+
+interface Props {
+  page: PageMeta;
+  eyebrow: string;
+  h1: string;
+  lead: string;
+  items?: Wallpaper[];
+  previews?: string[];
+  phone?: boolean;
+  faq?: { q: string; a: string }[];
+}
+const { page, eyebrow, h1, lead, items, previews = [], phone = false, faq = [] } = Astro.props;
+const related = ['oil', 'macbook', 'desktop', 'iphone', 'ultrawide', 'free'].map((k) => PAGES[k]).filter((p) => p.path !== page.path);
+const themes = Object.values(THEMES).filter((t) => themeIndexable(t.key));
+const ogImage = items?.length ? `/img/w/${items[0].slug}.webp` : previews[0];
+---
+<Base page={page} pageType="hub" image={ogImage}>
+  <section class="section">
+    <div class="wrap center">
+      <p class="eyebrow">{eyebrow}</p>
+      <h1 set:html={h1} />
+      <p class="lead">{lead}</p>
+    </div>
+  </section>
+
+  {Astro.slots.has('top') && <section class="wrap" style="margin-bottom:56px"><slot name="top" /></section>}
+
+  <section class="wrap">
+    {items?.length ? <WallGrid items={items} eager={3} /> : (
+      <div class={`grid ${phone ? 'grid--phone' : 'grid--desk'}`}>
+        {previews.map((src) => (
+          <figure class={`tile ${phone ? 'tile--phone' : ''}`} style="margin:0">
+            <img src={src} alt="" loading="lazy" decoding="async" width={phone ? 400 : 800} height={phone ? 711 : 450} />
+          </figure>
+        ))}
+      </div>
+    )}
+    {!page.indexable && <p class="notice" style="margin-top:24px">The full catalog for this page is being added. Previews shown here are watermarked samples.</p>}
+  </section>
+
+  <div class="wrap prose"><slot /></div>
+
+  {faq.length > 0 && (
+    <section class="section">
+      <div class="wrap prose">
+        <h2>Questions</h2>
+        {faq.map((f) => (<details class="faq"><summary>{f.q}</summary><p>{f.a}</p></details>))}
+      </div>
+    </section>
+  )}
+
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">Browse by theme</p>
+      <ul class="chips">{themes.map((t) => <li><a href={`/wallpapers/${t.key}`}>{t.name} wallpapers</a></li>)}</ul>
+      <p class="eyebrow" style="margin-top:28px">Browse by screen</p>
+      <ul class="chips">{related.map((p) => <li><a href={p.path}>{p.title.split(/[:|]/)[0].trim()}</a></li>)}</ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .prose { max-width: 780px; }
+  .prose :global(h2) { font-size: clamp(1.5rem, 3vw, 2rem); margin-top: 1.6em; }
+  .prose :global(li) { color: var(--soft); margin-bottom: .4em; }
+  .faq { border-radius: 12px; margin-bottom: 10px; background: rgba(11,17,24,.6); box-shadow: inset 0 0 0 1px var(--line); }
+  .faq summary { cursor: pointer; font-weight: 600; padding: 16px 20px; min-height: 52px; display: flex; align-items: center; }
+  .faq p { margin: 0; padding: 0 20px 16px; }
+  .chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chips a { display: inline-block; padding: 10px 16px; border-radius: 999px; text-decoration: none; font-size: .9rem; box-shadow: inset 0 0 0 1px rgba(217,184,120,.4); color: var(--soft); }
+  .chips a:hover { color: var(--gold); }
+</style>

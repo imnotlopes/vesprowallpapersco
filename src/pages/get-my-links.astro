@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { PAGES } from '../data/pages';
+---
+<Base page={PAGES.links} pageType="links">
+  <section class="section"><div class="wrap" style="max-width:560px">
+    <p class="eyebrow">Already bought?</p>
+    <h1 style="font-size:clamp(2rem,5vw,3rem)">Get your <em class="serif">links again</em></h1>
+    <p class="lead">Enter the email you bought with and we will send every download link straight back to you.</p>
+    <form class="card" data-resend style="display:grid;gap:10px">
+      <label for="r-email" class="muted" style="font-size:.85rem">Email</label>
+      <input id="r-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"
+        style="padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(6,10,16,.7);color:#fff;font:inherit" />
+      <button class="btn" type="submit">Send my links</button>
+      <p role="status" aria-live="polite" data-msg style="margin:0;font-weight:600;min-height:1.2em"></p>
+    </form>
+    <p class="muted" style="margin-top:16px">Tip: the first email often lands in spam or promotions.</p>
+  </div></section>
+</Base>
+<script is:inline>
+  (function () {
+    var f = document.querySelector('[data-resend]'); if (!f) return;
+    var msg = f.querySelector('[data-msg]'), btn = f.querySelector('button');
+    f.addEventListener('submit', function (e) {
+      e.preventDefault(); btn.disabled = true; msg.textContent = 'Sending…';
+      fetch('/api/resend-links', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: f.email.value.trim() }) })
+        .then(function (r) { return r.json(); })
+        .then(function (d) { msg.textContent = d.ok ? 'If we find an order for that email, the links are on their way. Check your inbox and spam.' : (d.error || 'Something went wrong.'); })
+        .catch(function () { msg.textContent = 'Something went wrong. Please try again.'; })
+        .then(function () { btn.disabled = false; });
+    });
+  })();
+</script>

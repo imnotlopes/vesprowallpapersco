@@ -1,0 +1,47 @@
+---
+// Página de tema (/wallpapers/ocean, /wallpapers/cars…). Só é indexável com MIN_THEME obras ou mais.
+import Base from '../../layouts/Base.astro';
+import WallGrid from '../../components/WallGrid.astro';
+import BuyBox from '../../components/BuyBox.astro';
+import { productForTheme } from '../../../api/_lib/products.js';
+import { SITE } from '../../config';
+import { THEMES, byTheme, byCollection, themeIndexable, preview } from '../../data/wallpapers';
+import type { Theme } from '../../data/wallpapers';
+
+export function getStaticPaths() {
+  return Object.values(THEMES).filter((t) => byTheme(t.key).length > 0).map((t) => ({ params: { theme: t.key }, props: { t } }));
+}
+const { t } = Astro.props as { t: Theme };
+const items = byTheme(t.key);
+const tally: Record<string, number> = {};
+items.forEach((w) => { if (w.collection) tally[w.collection] = (tally[w.collection] || 0) + 1; });
+const pack = productForTheme(t.key) || Object.entries(tally).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+const others = Object.values(THEMES).filter((x) => x.key !== t.key && themeIndexable(x.key));
+const page = { path: `/wallpapers/${t.key}`, title: t.title, description: t.description, keyword: `${t.name.toLowerCase()} wallpaper 4k`, indexable: themeIndexable(t.key), priority: 0.7 };
+const jsonLd = [{
+  '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${t.name} wallpapers`, description: t.description, url: new URL(page.path, SITE.url).href,
+  hasPart: items.map((w) => ({ '@type': 'ImageObject', name: w.title, contentUrl: new URL(preview(w), SITE.url).href })),
+}];
+---
+<Base page={page} pageType="catalog" image={preview(items[0])} jsonLd={jsonLd}>
+  <section class="section">
+    <div class="wrap center">
+      <p class="eyebrow">{items.length} oil painting wallpapers</p>
+      <h1>{t.name} wallpapers <em class="serif">{items.some((w) => w.hd) ? 'in oil paint' : 'in 4K'}</em></h1>
+      <p class="lead">{t.intro}</p>
+    </div>
+  </section>
+  <section class="wrap"><WallGrid items={items} eager={3} /></section>
+  <section class="wrap" style="margin-top:32px;max-width:760px"><BuyBox pack={pack} packCount={pack ? byCollection(pack).length : 0} back={`/wallpapers/${t.key}`} title="Get these wallpapers in full resolution" /></section>
+  <section class="section">
+    <div class="wrap">
+      <p class="eyebrow">More themes</p>
+      <ul class="chips">{others.map((o) => <li><a href={`/wallpapers/${o.key}`}>{o.name} wallpapers</a></li>)}<li><a href="/wallpapers">All wallpapers</a></li></ul>
+    </div>
+  </section>
+</Base>
+<style>
+  .chips { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+  .chips a { display: inline-block; padding: 10px 16px; border-radius: 999px; text-decoration: none; font-size: .9rem; box-shadow: inset 0 0 0 1px rgba(217,184,120,.4); color: var(--soft); }
+  .chips a:hover { color: var(--gold); }
+</style>

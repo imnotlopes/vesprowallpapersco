@@ -1,0 +1,157 @@
+---
+// Carrinho lateral (todas as páginas). O estado fica no navegador (public/js/cart.js); o checkout é um POST
+// para /api/checkout com as coleções escolhidas. Ofertas (preços calculados de novo no servidor, em quote()):
+// combo de 3+ coleções com desconto, VESPRO™ Editions a preço de carrinho e o order bump do botão "Buy".
+import { PRODUCTS, OFFERS } from '../../api/_lib/products.js';
+import { WALLPAPERS, byCollection, preview, EDITIONS_LABEL } from '../data/wallpapers';
+const bumpThumbs = ['tiger-swimming-turquoise-water', 'pink-tennis-court-in-the-jungle', 'japanese-castle-full-moon']
+  .map((s) => WALLPAPERS.find((w) => w.slug === s)).filter(Boolean).map((w) => preview(w!, 400));
+const catalog = Object.fromEntries(Object.entries(PRODUCTS).map(([k, p]) => {
+  const items = p.kind === 'complete' ? WALLPAPERS : byCollection(k);
+  return [k, { name: p.name, collection: p.collection, edition: p.edition, price: p.price, kind: p.kind,
+    count: p.kind === 'complete' ? EDITIONS_LABEL : items.length, thumb: preview(items[0], 400), href: p.page }];
+}));
+---
+<div class="cart" data-cart data-catalog={JSON.stringify(catalog)} data-offers={JSON.stringify(OFFERS)} hidden>
+  <div class="cart__overlay" data-cart-close></div>
+  <aside class="cart__panel" role="dialog" aria-modal="true" aria-labelledby="cart-title" tabindex="-1">
+    <header class="cart__head">
+      <h2 id="cart-title">Your cart</h2>
+      <button type="button" class="cart__x" data-cart-close aria-label="Close cart">×</button>
+    </header>
+    <div class="cart__body">
+      <p class="cart__note" data-cart-note hidden></p>
+      <ul class="cart__list" data-cart-list></ul>
+      <p class="cart__nudge" data-cart-nudge hidden></p>
+      <p class="cart__empty muted" data-cart-empty>Your cart is empty. Add a collection below, or get every wallpaper at once.</p>
+      <div data-cart-more-wrap>
+        <p class="cart__label">Add another collection</p>
+        <div class="cart__more" data-cart-more></div>
+      </div>
+    </div>
+    <footer class="cart__foot" data-cart-foot>
+      <div class="cart__save" data-cart-save hidden></div>
+      <div class="cart__total"><span>Total</span><b data-cart-total>$0.00</b></div>
+      <form method="post" action="/api/checkout" data-cart-form>
+        <input type="hidden" name="items" />
+        <input type="hidden" name="src" />
+        <input type="hidden" name="back" />
+        <label class="cart__email">
+          <span>Where should we send your download links?</span>
+          <input type="email" name="email" placeholder="you@email.com" autocomplete="email" maxlength="254" />
+        </label>
+        <label class="cart__consent"><input type="checkbox" name="consent" value="1" />
+          <span>Email me a reminder if I don't finish checkout, plus new releases. Unsubscribe anytime.</span></label>
+        <button class="btn cart__go" type="submit" data-cart-go>Check out</button>
+        <div class="cart__upsell" data-cart-upsell>
+          <div class="cart__bar" aria-hidden="true"><span data-cart-bar></span></div>
+          <p class="cart__hint" data-cart-hint></p>
+          <p class="cart__or">or upgrade to everything</p>
+          <button class="cart__all" type="button" data-cart-all>
+            <b data-cart-all-label></b>
+            <small data-cart-all-sub></small>
+          </button>
+        </div>
+      </form>
+      <p class="cart__fine muted">Secure checkout by Stripe · Instant download · 14-day money-back guarantee</p>
+    </footer>
+  </aside>
+</div>
+
+<div class="bump" data-bump hidden>
+  <div class="bump__overlay" data-bump-close></div>
+  <div class="bump__box" role="dialog" aria-modal="true" aria-labelledby="bump-title" tabindex="-1">
+    <button type="button" class="bump__x" data-bump-close aria-label="Close">×</button>
+    <p class="bump__eyebrow">One upgrade before you go</p>
+    <h2 id="bump-title">Get <em class="serif">everything</em> for just <span data-bump-extra></span> more</h2>
+    <div class="bump__imgs" aria-hidden="true">{bumpThumbs.map((t) => <img src={t} alt="" width="400" height="225" loading="lazy" decoding="async" />)}</div>
+    <p class="bump__text" data-bump-text></p>
+    <ul class="bump__ticks">
+      <li>{EDITIONS_LABEL} wallpapers, every collection</li>
+      <li>Exclusive paintings you won't find anywhere else</li>
+      <li>Every new edition included, free</li>
+    </ul>
+    <a class="btn bump__yes" href="#" data-bump-yes></a>
+    <a class="bump__no" href="#" data-bump-no></a>
+  </div>
+</div>
+
+<style is:global>  /* global: os itens são criados pelo cart.js e não levam o escopo do Astro */
+  .cart { position: fixed; inset: 0; z-index: 60; }
+  .cart[hidden] { display: none; }
+  .cart__overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .6); opacity: 0; transition: opacity .25s; }
+  .cart__panel { position: absolute; top: 0; right: 0; bottom: 0; width: min(420px, 100%); display: flex; flex-direction: column;
+    background: #0b1118; box-shadow: -1px 0 0 var(--line), -30px 0 60px rgba(0, 0, 0, .5); transform: translateX(100%); transition: transform .25s ease; outline: none; }
+  .cart.is-open .cart__overlay { opacity: 1; }
+  .cart.is-open .cart__panel { transform: none; }
+  .cart__head { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid var(--line); }
+  .cart__head h2 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0; margin: 0; }
+  .cart__x { background: none; border: 0; color: var(--fg); font-size: 1.8rem; line-height: 1; cursor: pointer; padding: 0 4px; }
+  .cart__body { flex: 1; overflow-y: auto; padding: 8px 22px 16px; }
+  .cart__note { margin: 12px 0 0; font-size: .85rem; color: var(--gold); }
+  .cart__list { list-style: none; margin: 0; padding: 0; }
+  .cart__item { display: grid; grid-template-columns: 76px 1fr auto; gap: 14px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+  .cart__item img { width: 76px; aspect-ratio: 16/10; object-fit: cover; border-radius: 8px; }
+  .cart__item b { display: block; font-weight: 600; font-size: .92rem; color: var(--fg); }
+  .cart__item small { color: var(--muted); font-size: .8rem; }
+  .cart__rm { background: none; border: 0; color: var(--muted); font-size: .8rem; cursor: pointer; text-decoration: underline; }
+  .cart__rm:hover { color: var(--fg); }
+  .cart__empty { margin: 20px 0; }
+  .cart__label { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 22px 0 10px; }
+  .cart__more { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .cart__add { background: rgba(255, 255, 255, .03); border: 0; box-shadow: inset 0 0 0 1px var(--line); border-radius: 10px; padding: 6px 6px 10px; color: var(--fg);
+    cursor: pointer; text-align: left; font: inherit; }
+  .cart__add:hover { box-shadow: inset 0 0 0 1px rgba(217, 184, 120, .6); }
+  .cart__add img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 6px; margin-bottom: 6px; }
+  .cart__add i { display: block; font-style: normal; font-size: .66rem; letter-spacing: .12em; color: var(--muted); }
+  .cart__add b { display: block; font-size: .78rem; font-weight: 600; line-height: 1.25; margin: 1px 0 2px; }
+  .cart__add small { display: block; font-size: .72rem; color: var(--gold); margin-top: 3px; }
+  .cart__foot { padding: 16px 22px 18px; border-top: 1px solid var(--line); background: #0a0f15; }
+  .cart__total { display: flex; justify-content: space-between; font-size: 1.05rem; margin-bottom: 12px; }
+  .cart__email { display: grid; gap: 6px; font-size: .82rem; color: var(--soft); }
+  .cart__email input { width: 100%; padding: 11px 13px; border-radius: 10px; border: 0; background: #060a10; color: var(--fg); font: inherit;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
+  .cart__email input:focus { outline: none; box-shadow: inset 0 0 0 1px var(--gold); }
+  .cart__consent { display: flex; gap: 8px; align-items: flex-start; font-size: .74rem; color: var(--muted); margin: 10px 0 12px; line-height: 1.4; }
+  .cart__consent { cursor: pointer; }
+  .cart__consent input { margin-top: 0; width: 18px; height: 18px; flex-shrink: 0; accent-color: #d9b878; }
+  .cart__go { width: 100%; justify-content: center; }
+  .cart__go[disabled] { opacity: .7; cursor: progress; }
+  .cart__upsell { margin-top: 14px; text-align: center; }
+  .cart__bar { height: 4px; border-radius: 4px; background: rgba(255, 255, 255, .1); overflow: hidden; }
+  .cart__bar span { display: block; height: 100%; width: 0; background: var(--gold); transition: width .3s; }
+  .cart__hint { font-size: .8rem; color: var(--soft); margin: 8px 0 0; }
+  .cart__or { font-size: .66rem; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 12px 0 8px; }
+  .cart__all { width: 100%; border: 0; border-radius: 10px; padding: 11px 14px; cursor: pointer; color: #fff; font: inherit;
+    background: #1f6f4f; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .15); display: grid; gap: 2px; }
+  .cart__all:hover { background: #237a57; }
+  .cart__all b { font-size: 1rem; }
+  .cart__all small { font-size: .74rem; opacity: .85; }
+  .cart__fine { font-size: .7rem; text-align: center; margin: 12px 0 0; }
+  .cart__price s { color: var(--muted); margin-right: 4px; }
+  .cart__price em { font-style: normal; color: var(--gold); }
+  .cart__nudge { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; font-size: .82rem; color: var(--fg);
+    background: rgba(217, 184, 120, .1); box-shadow: inset 0 0 0 1px rgba(217, 184, 120, .4); }
+  .cart__nudge.is-on { background: rgba(31, 111, 79, .25); box-shadow: inset 0 0 0 1px rgba(80, 200, 140, .45); }
+  .cart__save { display: flex; justify-content: space-between; font-size: .85rem; color: #6fd6a3; margin-bottom: 4px; }
+  .cart__all s { opacity: .7; margin-right: 4px; font-weight: 400; }
+
+  /* order bump */
+  .bump { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; padding: 16px; }
+  .bump[hidden] { display: none; }
+  .bump__overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .7); }
+  .bump__box { position: relative; width: min(460px, 100%); max-height: calc(100vh - 32px); overflow-y: auto; border-radius: 18px; padding: 26px 24px 20px;
+    background: #0b1118; box-shadow: 0 0 0 1px rgba(217, 184, 120, .5), 0 30px 80px rgba(0, 0, 0, .7); text-align: center; outline: none; }
+  .bump__x { position: absolute; top: 8px; right: 10px; background: none; border: 0; color: var(--muted); font-size: 1.6rem; cursor: pointer; width: 40px; height: 40px; }
+  .bump__eyebrow { font-size: .7rem; letter-spacing: .18em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin: 0 0 8px; }
+  .bump__box h2 { font-size: clamp(1.5rem, 5vw, 1.9rem); margin: 0 0 14px; }
+  .bump__imgs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px; }
+  .bump__imgs img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 8px; }
+  .bump__text { font-size: .92rem; margin: 0 0 10px; }
+  .bump__ticks { list-style: none; padding: 0; margin: 0 auto 16px; display: grid; gap: 5px; text-align: left; max-width: 320px; font-size: .86rem; color: var(--soft); }
+  .bump__ticks li::before { content: '\2713'; color: var(--gold); margin-right: 8px; }
+  .bump__yes { width: 100%; justify-content: center; padding-block: 16px; }
+  .bump__no { display: inline-block; margin-top: 12px; padding: 8px; font-size: .84rem; color: var(--muted); }
+  .bump__no:hover { color: var(--fg); }
+  @media (prefers-reduced-motion: reduce) { .cart__panel, .cart__overlay { transition: none; } }
+</style>

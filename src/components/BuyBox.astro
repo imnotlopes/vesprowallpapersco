@@ -1,0 +1,54 @@
+---
+// Bloco de compra: coleção do tema (quando houver, com "Buy" direto ou "+ Cart") + VESPRO™ Editions. O botão vai para /api/checkout,
+// que cria a sessão no Stripe; track.js acrescenta a origem da visita (src) e dispara ClickBuy/ReachCheckout.
+// Layout pela largura do próprio bloco (container query): estreito = texto em cima e botões embaixo; largo = lado a lado.
+import { PRODUCTS, formatPrice } from '../../api/_lib/products.js';
+import { EDITIONS_LABEL } from '../data/wallpapers';
+interface Props { pack?: string | null; packCount?: number; back: string; title?: string; }
+const { pack, packCount = 0, back, title = 'Get the full-resolution files' } = Astro.props;
+const p = pack ? PRODUCTS[pack] : null;
+const c = PRODUCTS.complete;
+const href = (key: string) => `/api/checkout?product=${key}&back=${encodeURIComponent(back.replace(/^\//, ''))}`;
+---
+<div class="buy card">
+  <p class="buy__title">{title}</p>
+  {p && (
+    <div class="buy__item">
+      <div class="buy__info">
+        <b>{p.name}</b>
+        <span>{packCount} wallpapers in {p.hd ? 'HD' : '4K'} · <a href={p.page}>See the collection</a></span>
+      </div>
+      <div class="buy__btns">
+        <a class="btn" href={href(pack!)} data-checkout data-track="ClickBuy" data-track-value={(p.price / 100).toFixed(2)} data-track-name={p.name}>Buy {formatPrice(p.price)}</a>
+        <button type="button" class="btn btn--ghost" data-add-to-cart={pack}>+ Cart</button>
+      </div>
+    </div>
+  )}
+  <div class="buy__item">
+    <div class="buy__info">
+      <b>{c.name}</b>
+      <span>{EDITIONS_LABEL} wallpapers, plus every new edition · <a href="/collections/complete">See what's inside</a></span>
+    </div>
+    <div class="buy__btns">
+      <a class={`btn ${p ? 'btn--ghost' : ''}`} href={href('complete')} data-checkout data-track="ClickBuy" data-track-value={(c.price / 100).toFixed(2)} data-track-name={c.name}>Buy {formatPrice(c.price)}</a>
+    </div>
+  </div>
+  <p class="buy__fine muted">One-time payment · Secure checkout by Stripe · Instant download · 14-day money-back guarantee</p>
+</div>
+<style>
+  .buy { container-type: inline-size; }
+  .buy__title { font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+  .buy__item { display: grid; gap: 12px; padding: 16px 0; border-top: 1px solid var(--line); }
+  .buy__item:first-of-type { border-top: 0; }
+  .buy__info b { display: block; color: var(--fg); font-weight: 600; line-height: 1.3; }
+  .buy__info span { display: block; font-size: .86rem; color: var(--muted); margin-top: 3px; }
+  .buy__info a { color: var(--gold); }
+  .buy__btns { display: flex; gap: 8px; }
+  .buy__btns .btn { justify-content: center; white-space: nowrap; }
+  .buy__btns .btn:first-child { flex: 1; }
+  .buy__fine { font-size: .78rem; margin: 6px 0 0; }
+  @container (min-width: 600px) {
+    .buy__item { grid-template-columns: 1fr auto; align-items: center; gap: 20px; }
+    .buy__btns .btn:first-child { flex: none; min-width: 150px; }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+import Hub from '../components/Hub.astro';
+import { PAGES } from '../data/pages';
+import { WALLPAPERS } from '../data/wallpapers';
+const faq = [
+  { q: 'What wallpaper resolution does a MacBook need?', a: 'MacBook Air and 14-inch MacBook Pro screens are between 2560 and 3024 pixels wide; the 16-inch MacBook Pro is 3456 × 2234. A 4K (3840 × 2160) wallpaper covers all of them with room to spare, so it stays sharp on Retina displays.' },
+  { q: 'My MacBook screen is 16:10. Will a 16:9 wallpaper fit?', a: 'Yes. macOS fills the screen and trims a thin strip from the sides. All VESPRO™ paintings are composed with the subject away from the edges, so nothing important is cut.' },
+  { q: 'How do I set a wallpaper on a Mac?', a: 'Open System Settings › Wallpaper, click Add Photo (or Add Folder), choose the image and select Fill Screen. You can also right-click an image in Finder and choose Set Desktop Picture.' },
+  { q: 'Do they work on iMac and external displays?', a: 'Yes. The 4K files suit the 24-inch iMac and 4K or 5K external monitors.' },
+];
+---
+<Hub page={PAGES.macbook} eyebrow="MacBook wallpapers"
+  h1='MacBook wallpapers <em class="serif">that look painted</em>'
+  lead="Oil painting wallpapers for MacBook Air, MacBook Pro and iMac, delivered in 4K so every brushstroke stays sharp on Retina."
+  items={WALLPAPERS} faq={faq}>
+  <h2>Oil paintings sized for Retina</h2>
+  <p>A MacBook screen packs a lot of pixels into a small space, which is exactly where cheap, upscaled wallpapers fall apart. VESPRO™ paintings are exported in 4K, so the texture of the paint holds up even when you lean in: the ridges, the broken colour, the highlights.</p>
+  <p>Mac users tend to keep a tidy desktop, so many of these paintings leave open areas of sky, snow or water where your icons and widgets can sit without fighting the image. Prefer a dark menu bar? Try the ocean and city themes; for a light, airy look, the winter paintings work well.</p>
+</Hub>

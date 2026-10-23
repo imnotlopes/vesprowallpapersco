@@ -1,0 +1,87 @@
+---
+// Página de cada coleção nova (Signature, Sporting, Shadows). As 6 primeiras usam a página do tema;
+// o VESPRO™ Editions tem página própria (complete.astro). Mostra até 24 obras para manter a curiosidade.
+import Base from '../../layouts/Base.astro';
+import WallGrid from '../../components/WallGrid.astro';
+import BuyBox from '../../components/BuyBox.astro';
+import { PRODUCTS, formatPrice } from '../../../api/_lib/products.js';
+import { byCollection, preview, EDITIONS_LABEL } from '../../data/wallpapers';
+
+export function getStaticPaths() {
+  return Object.entries(PRODUCTS)
+    .filter(([, p]) => p.kind === 'pack' && p.page.startsWith('/collections/'))
+    .map(([key, p]) => ({ params: { key: p.page.split('/').pop() }, props: { key } }));
+}
+const { key } = Astro.props;
+const p = PRODUCTS[key];
+const items = byCollection(key);
+const shown = items.slice(0, 24);
+const res = p.hd ? 'HD' : '4K';
+const buy = `/api/checkout?product=${key}&back=${p.page.slice(1)}`;
+const page = {
+  path: p.page,
+  title: `${p.name.replace(/ /g, ' ')}: ${items.length} Oil Painting Wallpapers in ${res} | VESPRO™`.replace('VESPRO™ ', ''),
+  description: `${p.blurb} ${items.length} impasto oil painting wallpapers for desktop and laptop. One-time payment, instant download.`.slice(0, 158),
+  keyword: `${p.collection.toLowerCase()} wallpapers`,
+  indexable: true,
+  priority: 0.8,
+};
+const faq = [
+  { q: `What is in ${p.name.replace(/ /g, ' ')}?`, a: `${items.length} oil painting wallpapers in ${res === 'HD' ? 'HD (1672 × 941)' : '4K (3840 × 2160)'}, delivered as one download right after checkout.` },
+  { q: 'Is it a one-time payment?', a: 'Yes. Pay once and keep the files for life.' },
+  { q: 'Is it part of VESPRO™ Editions?', a: `Yes. VESPRO™ Editions includes this collection, every other collection and exclusive paintings, ${EDITIONS_LABEL} wallpapers in total, plus every new edition.` },
+  { q: 'What if I don\'t like them?', a: 'Email us within 14 days and we refund you in full.' },
+];
+---
+<Base page={page} pageType="collection" image={preview(items[0])}>
+  <section class="section col-hero">
+    <div class="wrap center">
+      <p class="eyebrow">VESPRO™ Collection · {p.edition}</p>
+      <h1>{p.collection} <em class="serif">{p.edition}</em></h1>
+      <p class="lead" style="margin-inline:auto">{p.blurb}</p>
+      <div class="col-price"><b>{formatPrice(p.price)}</b><span>{items.length} wallpapers in {res} · one-time payment</span></div>
+      <div class="col-cta">
+        <a class="btn" href={buy} data-checkout data-track="ClickBuy" data-track-value={(p.price / 100).toFixed(2)} data-track-name={p.name}>Get {p.collection} for {formatPrice(p.price)}</a>
+        <button type="button" class="btn btn--ghost" data-add-to-cart={key}>+ Cart</button>
+      </div>
+      <p class="muted col-trust">Instant download · Secure checkout by Stripe · 14-day money-back guarantee</p>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <WallGrid items={shown} eager={3} />
+    {items.length > shown.length && (
+      <p class="center col-more">+{items.length - shown.length} more paintings inside the collection</p>
+    )}
+  </section>
+
+  <section class="section">
+    <div class="wrap" style="max-width:760px">
+      <BuyBox pack={key} packCount={items.length} back={p.page} title={`Get ${p.collection} in full resolution`} />
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap faqw">
+      <h2 class="center">Questions</h2>
+      {faq.map((f) => (<details class="faqi"><summary>{f.q}</summary><p>{f.a}</p></details>))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .col-hero h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); }
+  .col-price { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 18px 0; }
+  .col-price b { font-size: 2.4rem; font-weight: 600; }
+  .col-price span { color: var(--muted); font-size: .9rem; text-align: left; }
+  .col-cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .col-trust { font-size: .8rem; margin-top: 14px; }
+  .col-more { color: var(--gold); margin-top: 22px; font-weight: 500; }
+  .faqw { max-width: 780px; }
+  .faqi { border-radius: 14px; margin-bottom: 10px; background: rgba(11,17,24,.6); box-shadow: inset 0 0 0 1px var(--line); }
+  .faqi[open] { box-shadow: inset 0 0 0 1px rgba(217,184,120,.5); }
+  .faqi summary { cursor: pointer; font-weight: 600; list-style: none; padding: 18px 22px; min-height: 56px; display: flex; align-items: center; }
+  .faqi summary::-webkit-details-marker { display: none; }
+  .faqi p { margin: 0; padding: 0 22px 18px; }
+  @media (max-width: 560px) { .col-cta { flex-direction: column; } .col-cta .btn { width: 100%; justify-content: center; } }
+</style>

@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+const page = { path: '/404', title: 'Page not found | VESPRO™', description: 'This page does not exist.', keyword: '', indexable: false, priority: 0 };
+---
+<Base page={page} pageType="404">
+  <section class="section"><div class="wrap center">
+    <h1>Lost in the <em class="serif">brushstrokes</em></h1>
+    <p class="lead">This page doesn't exist. Try the full collection instead.</p>
+    <a class="btn" href="/wallpapers">Browse wallpapers</a>
+  </div></section>
+</Base>

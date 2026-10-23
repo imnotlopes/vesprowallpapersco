@@ -1,0 +1,20 @@
+---
+import Legal from '../components/Legal.astro';
+import { PAGES } from '../data/pages';
+import { SITE } from '../config';
+---
+<Legal page={PAGES.license} heading="License" updated="October 2026">
+  <h2>Personal license (included with every download)</h2>
+  <ul>
+    <li>Use the wallpapers on your own devices: computers, phones, tablets and monitors.</li>
+    <li>Keep the files backed up and move them between your devices.</li>
+  </ul>
+  <h2>Not allowed without a commercial license</h2>
+  <ul>
+    <li>Reselling, sharing or redistributing the files, in full or in part.</li>
+    <li>Printing for sale, or using the artwork in products, ads or merchandise.</li>
+    <li>Uploading the files to wallpaper sites, apps or AI training datasets.</li>
+  </ul>
+  <h2>Commercial license</h2>
+  <p>Want to use VESPRO™ artwork in a product, store or app? Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> with what you have in mind.</p>
+</Legal>

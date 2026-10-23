@@ -1,0 +1,29 @@
+---
+// Frase revelada palavra por palavra conforme a rolagem. *palavra* = destaque.
+const paragraphs = [
+  'We never set out to make “just another wallpaper.”',
+  'Every piece is designed to look like real *paint:* thick brushstrokes, *texture,* shadow, *light,* and plenty of *depth.*',
+  'The kind that makes you look twice because it feels like there\'s an actual painting on your screen.',
+  'And since we already spend so much of the day looking at our laptops and phones... we might as well enjoy the *view.*',
+];
+const words = (p: string) => p.split(' ').map((w) => ({ w: w.replace(/\*/g, ''), hl: w.startsWith('*') }));
+---
+<section class="section wr">
+  <div class="wrap wr__in" data-word-reveal>
+    {paragraphs.map((p, i) => (
+      <p class={i === 0 ? 'wr__big' : 'wr__p'}>
+        {words(p).map(({ w, hl }) => <span data-hl={hl ? '1' : undefined}>{w} </span>)}
+      </p>
+    ))}
+  </div>
+</section>
+<style>
+  .wr__in { max-width: 900px; text-align: center; }
+  .wr__in p { font-weight: 500; line-height: 1.3; color: var(--fg); margin: 0 0 1.2em; }
+  .wr__big { font-size: clamp(1.7rem, 4vw, 3rem); letter-spacing: -0.02em; }
+  .wr__p { font-size: clamp(1.25rem, 2.6vw, 1.9rem); }
+  .wr__in span { opacity: .15; transition: opacity .2s; }
+  .wr__in span[data-hl] { color: var(--gold); }
+  @media (prefers-reduced-motion: reduce) { .wr__in span { opacity: 1; } }
+  :global(.no-js) .wr__in span { opacity: 1; }
+</style>

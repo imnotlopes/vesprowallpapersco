@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.astro/
+.vercel/
+.env*
+# originais sem marca d'água e arquivos de trabalho nunca vão para o repositório
+originais/
+.claude/
+Thumbs.db
+desktop.ini
+.DS_Store
+# modelo da marca d'água: permite remover a marca das prévias, nunca publicar
+scripts/marca-dagua/
+!.env.example
+
+# artes originais sem marca d água (nunca publicar)
+arts/

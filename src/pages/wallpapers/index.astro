@@ -1,0 +1,18 @@
+---
+import Hub from '../../components/Hub.astro';
+import PackGrid from '../../components/PackGrid.astro';
+import { PAGES } from '../../data/pages';
+import { showcase, EDITIONS_LABEL } from '../../data/wallpapers';
+const picks = showcase(50);   // amostra variada; o catálogo inteiro fica para quem compra
+---
+<Hub page={PAGES.catalog} eyebrow={`${EDITIONS_LABEL} oil painting wallpapers`}
+  h1='Every VESPRO™ <em class="serif">wallpaper</em>'
+  lead="Impasto oil painting wallpapers in collections. Pick one, get everything at once, or take a first look at 50 of our paintings below."
+  items={picks}>
+  <Fragment slot="top">
+    <h2 class="center" style="margin-bottom:28px">Shop by <em class="serif">collection</em></h2>
+    <PackGrid back="/wallpapers" />
+    <h2 class="center" style="margin:72px 0 0">A first <em class="serif">look</em></h2>
+    <p class="center muted" style="margin:10px 0 0">50 paintings from every collection. Many more are waiting inside.</p>
+  </Fragment>
+</Hub>

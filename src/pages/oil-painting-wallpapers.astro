@@ -1,0 +1,21 @@
+---
+import Hub from '../components/Hub.astro';
+import { PAGES } from '../data/pages';
+import { WALLPAPERS } from '../data/wallpapers';
+const faq = [
+  { q: 'What is an impasto wallpaper?', a: 'Impasto is an oil painting technique where paint is laid on so thickly that brushstrokes stand out from the canvas. Our wallpapers are painted in that style, so you see ridges of paint, texture and depth instead of a flat illustration.' },
+  { q: 'What resolution are the oil painting wallpapers?', a: 'Desktop versions are 4K (3840 × 2160, 16:9). That is sharp on 4K monitors, MacBook Retina screens and 1440p displays, and it scales down cleanly on 1080p.' },
+  { q: 'Are these physical wallpapers for walls?', a: 'No. VESPRO™ makes digital wallpapers for computer and phone screens. Nothing is shipped; you download the image files.' },
+  { q: 'Can I use them on more than one device?', a: 'Yes. The personal license covers all of your own devices.' },
+];
+---
+<Hub page={PAGES.oil} eyebrow="Oil painting wallpapers"
+  h1='Oil painting wallpapers <em class="serif">in 4K</em>'
+  lead="Thick impasto brushstrokes, real texture and depth. Painted scenes made to live on your screen. For MacBook, PC and every 4K monitor."
+  items={WALLPAPERS} faq={faq}>
+  <h2>Why an oil painting on your desktop</h2>
+  <p>Most wallpapers are photos or flat digital art. An oil painting gives your screen something those can't: surface. Every VESPRO™ wallpaper is built with heavy, directional brushstrokes, so the light on a wave crest, a car's paintwork or a city window looks physical, as if the canvas were behind the glass.</p>
+  <p>The palettes are chosen with your desktop in mind. Some paintings are bright and open, with plenty of sky for your icons; others are dark and low-key for a calm, focused setup. Browse by theme (ocean, winter, cities, cars or animals) and pick the mood you want to look at every day.</p>
+  <h2>Made for every screen</h2>
+  <p>Desktop versions are delivered in 4K (3840 × 2160). They look sharp on 27-inch 4K monitors and MacBook Retina displays, and stay crisp when your system scales them down. Want to know how to set one up? Each wallpaper works with the standard settings on Windows, macOS and iPhone. No apps needed.</p>
+</Hub>

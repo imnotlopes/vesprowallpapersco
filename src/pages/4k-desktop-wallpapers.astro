@@ -1,0 +1,19 @@
+---
+import Hub from '../components/Hub.astro';
+import { PAGES } from '../data/pages';
+import { WALLPAPERS } from '../data/wallpapers';
+const faq = [
+  { q: 'What size is a 4K desktop wallpaper?', a: '4K UHD is 3840 × 2160 pixels in a 16:9 ratio, the native resolution of most 4K monitors and TVs. It also looks sharp on 1440p and 1080p screens.' },
+  { q: 'How do I set a wallpaper on Windows 11?', a: 'Right-click the image and choose Set as desktop background, or go to Settings › Personalization › Background, pick Picture, browse to the file and choose Fill.' },
+  { q: 'Will it work with two monitors?', a: 'Yes. In Windows you can right-click a wallpaper in Settings › Personalization › Background and choose which monitor it goes on, or set a different painting on each screen.' },
+  { q: 'Do you have ultrawide versions?', a: 'Ultrawide (21:9 and 32:9) versions are being added. On an ultrawide today, use Fill and the painting will be cropped top and bottom.' },
+];
+---
+<Hub page={PAGES.desktop} eyebrow="4K desktop wallpapers"
+  h1='4K desktop wallpapers <em class="serif">for PC & Windows</em>'
+  lead="Oil painting wallpapers at 3840 × 2160 for Windows PCs, laptops and monitors, detailed enough for a 27-inch 4K screen."
+  items={WALLPAPERS} faq={faq}>
+  <h2>A painted desktop for your PC</h2>
+  <p>A 4K monitor shows every flaw in a low-quality wallpaper. These are painted in heavy impasto and exported at full 4K, so the brushwork reads clearly from your chair and still rewards a closer look.</p>
+  <p>Gaming setups and work desks call for different moods: the darker paintings (sharks, night cities, still lifes) sit nicely behind RGB lighting and dark mode, while the bright skies and snowfields keep a daytime workspace feeling open.</p>
+</Hub>

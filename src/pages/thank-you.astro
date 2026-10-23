@@ -1,0 +1,84 @@
+---
+import Base from '../layouts/Base.astro';
+import { PAGES } from '../data/pages';
+import { PRODUCTS, OFFERS } from '../../api/_lib/products.js';
+import { EDITIONS_LABEL } from '../data/wallpapers';
+---
+<Base page={PAGES.thanks} pageType="thanks" floaters={false}>
+  <section class="section"><div class="wrap center">
+    <p class="eyebrow">Order confirmed</p>
+    <h1>Thank you, <em class="serif">your wallpapers are ready</em></h1>
+    <p class="lead" data-order-line>Your download links are on their way to the email you used at checkout. It usually takes less than a minute.</p>
+    <div class="ty__links" data-order-links hidden></div>
+
+    <!-- Upgrade pós-compra: o que já foi pago conta (preço final recalculado no servidor, em /api/checkout?upgrade=) -->
+    <div class="ty__up card" data-upgrade data-full={PRODUCTS.complete.price} data-min={OFFERS.upgradeMin} hidden>
+      <p class="eyebrow">Complete your collection</p>
+      <h2>Upgrade to VESPRO™ <em class="serif">Editions</em></h2>
+      <p>Get all {EDITIONS_LABEL} wallpapers, every collection, the exclusive paintings and every new edition.
+        What you just paid counts, so you only pay the difference.</p>
+      <p class="ty__price"><s data-upgrade-full></s> <b data-upgrade-price></b></p>
+      <a class="btn" href="#" data-upgrade-go>Upgrade now</a>
+      <p class="muted ty__fine">One-time payment · Same 14-day money-back guarantee</p>
+    </div>
+
+    <p class="muted">Nothing in your inbox after 10 minutes? Check spam, or <a href="/get-my-links">get your links again</a>.</p>
+    <a class="btn btn--ghost" href="/wallpapers">Back to the wallpapers</a>
+  </div></section>
+</Base>
+<style>
+  .ty__links { display: grid; gap: 12px; max-width: 480px; margin: 8px auto 28px; }
+  .ty__links :global(a) { justify-content: center; }
+  .ty__up { max-width: 520px; margin: 8px auto 32px; text-align: center; box-shadow: inset 0 0 0 1px rgba(217, 184, 120, .5); }
+  .ty__up h2 { font-size: clamp(1.5rem, 4vw, 2rem); }
+  .ty__price { font-size: 1.6rem; margin: 6px 0 16px; }
+  .ty__price s { color: var(--muted); font-size: 1.1rem; margin-right: 6px; }
+  .ty__price b { color: var(--gold); }
+  .ty__fine { font-size: .78rem; margin: 12px 0 0; }
+</style>
+<script is:inline>
+  // Mostra os links de download do pedido pago (a entrega não depende do e-mail) e dispara o Purchase
+  // com o valor real; eventID = id da sessão (não conta duas vezes ao recarregar e casa com a API de Conversões).
+  // Quem não comprou o Editions vê a oferta de upgrade com o valor pago abatido.
+  (function () {
+    var id = new URLSearchParams(location.search).get('session_id'); if (!id) return;
+    var KEY = 'vespro_purchase_' + id, done = false;
+    try { done = !!localStorage.getItem(KEY); } catch (e) {}
+    var money = function (c) { return '$' + (c / 100).toFixed(2); };
+    fetch('/api/order?session_id=' + encodeURIComponent(id)).then(function (r) { return r.json(); }).then(function (o) {
+      if (!o || !o.ok) return;
+      var line = document.querySelector('[data-order-line]');
+      if (line && o.name) line.textContent = 'Here is your ' + o.name + '. We also emailed the links to the address you used at checkout.';
+      var box = document.querySelector('[data-order-links]');
+      if (box && o.items && o.items.length) {
+        o.items.forEach(function (i) {
+          var a = document.createElement('a');
+          a.className = 'btn'; a.href = i.link; a.target = '_blank'; a.rel = 'noopener';
+          a.textContent = 'Download ' + i.name;
+          box.appendChild(a);
+        });
+        box.hidden = false;
+      }
+      var up = document.querySelector('[data-upgrade]');
+      if (up && (o.products || []).indexOf('complete') < 0) {
+        var full = +up.getAttribute('data-full'), price = Math.max(full - Math.round(o.value * 100), +up.getAttribute('data-min'));
+        up.querySelector('[data-upgrade-full]').textContent = money(full);
+        up.querySelector('[data-upgrade-price]').textContent = money(price);
+        var goBtn = up.querySelector('[data-upgrade-go]');
+        goBtn.textContent = 'Upgrade now for ' + money(price);
+        goBtn.setAttribute('href', '/api/checkout?upgrade=' + encodeURIComponent(o.id) + '&back=thank-you');
+        goBtn.addEventListener('click', function () {
+          if (window.fbq) fbq('trackCustom', 'UpgradeClicked', { value: price / 100, currency: 'USD' });
+          if (window.clarity) clarity('event', 'UpgradeClicked');
+        });
+        up.hidden = false;
+        if (window.clarity) clarity('event', 'UpgradeShown');
+      }
+      window.dispatchEvent(new Event('vespro-cart-clear'));   // pedido pago: esvazia o carrinho (public/js/cart.js)
+      if (done) return;
+      if (window.fbq) fbq('track', 'Purchase', { value: o.value, currency: o.currency, content_name: o.name, content_ids: o.products, content_type: 'product' }, { eventID: o.id });
+      if (window.clarity) { clarity('event', 'Purchase'); clarity('set', 'purchased', (o.products || []).join(',')); }
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+    }).catch(function () {});
+  })();
+</script>

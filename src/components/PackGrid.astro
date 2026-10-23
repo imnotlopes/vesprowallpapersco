@@ -1,0 +1,72 @@
+---
+// Vitrine de packs (como a loja da referência): pack grátis, Coleção Completa e um card por tema,
+// cada um com "Buy" direto (Stripe) e "+ Cart". Mosaico com 4 prévias do tema.
+import { PRODUCTS, FREE_PACK, BRAND, formatPrice } from '../../api/_lib/products.js';
+import { WALLPAPERS, byCollection, preview, FREE_ITEMS, EDITIONS_LABEL } from '../data/wallpapers';
+interface Props { back: string; }
+const { back } = Astro.props;
+const href = (key: string) => `/api/checkout?product=${key}&back=${encodeURIComponent(back.replace(/^\//, ''))}`;
+const packs = Object.entries(PRODUCTS).filter(([, p]) => p.kind === 'pack').map(([key, p]) => ({ key, p, items: byCollection(key) }));
+const c = PRODUCTS.complete;
+const perWallpaper = (Math.ceil(c.price / 150) / 100).toFixed(2);   // teto do preço por obra com 150 obras
+const mosaic = (items: typeof WALLPAPERS) => items.slice(0, 4);
+---
+<div class="packs">
+  <article class="pk pk--feat">
+    <a class="pk__img" href="/collections/complete" aria-label={c.name}>
+      {mosaic(WALLPAPERS.slice(6)).map((w) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />)}
+      <span class="pk__more">{EDITIONS_LABEL} wallpapers inside</span>
+    </a>
+    <div class="pk__row"><h3><a href="/collections/complete">{c.name}</a></h3><span class="pk__price">{formatPrice(c.price)}</span></div>
+    <p class="pk__sub">{EDITIONS_LABEL} wallpapers, every collection, plus every new release · under ${perWallpaper} a wallpaper</p>
+    <div class="pk__btns">
+      <a class="btn" href={href('complete')} data-checkout data-track="ClickBuy" data-track-value={(c.price / 100).toFixed(2)} data-track-name={c.name}>Buy →</a>
+      <button type="button" class="btn btn--ghost" data-add-to-cart="complete">+ Cart</button>
+    </div>
+  </article>
+
+  {packs.map(({ key, p, items }) => (
+    <article class="pk">
+      <a class="pk__img" href={p.page} aria-label={p.name}>
+        {mosaic(items).map((w) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />)}
+        {items.length > 4 && <span class="pk__more">+{items.length - 4} more inside</span>}
+      </a>
+      <div class="pk__row"><h3><a href={p.page}>{p.name}</a></h3><span class="pk__price">{formatPrice(p.price)}</span></div>
+      <p class="pk__sub">{items.length} oil painting wallpapers in {p.hd ? 'HD' : '4K'}</p>
+      <div class="pk__btns">
+        <a class="btn" href={href(key)} data-checkout data-track="ClickBuy" data-track-value={(p.price / 100).toFixed(2)} data-track-name={p.name}>Buy →</a>
+        <button type="button" class="btn btn--ghost" data-add-to-cart={key}>+ Cart</button>
+      </div>
+    </article>
+  ))}
+
+  <article class="pk">
+    <a class="pk__img" href="/free-4k-wallpapers" aria-label={FREE_PACK.name}>
+      {mosaic(FREE_ITEMS).map((w) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />)}
+      <span class="pk__more">+{FREE_ITEMS.length - 4} more inside</span>
+    </a>
+    <div class="pk__row"><h3><a href="/free-4k-wallpapers">{BRAND} {FREE_PACK.collection}</a></h3><span class="pk__price">$0.00</span></div>
+    <p class="pk__sub">{FREE_ITEMS.length} full-resolution wallpapers, delivered to your inbox</p>
+    <div class="pk__btns"><a class="btn btn--ghost" href="/free-4k-wallpapers" data-track="ClickFreePack">Download free →</a></div>
+  </article>
+</div>
+
+<style>
+  .packs { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 32px 24px; }
+  .pk { display: flex; flex-direction: column; }
+  .pk__img { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .12), 0 18px 40px -18px rgba(0, 0, 0, .7); }
+  .pk__img img { width: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform .5s; }
+  .pk__img:hover img { transform: scale(1.04); }
+  .pk__more { position: absolute; left: 10px; bottom: 10px; font-size: .74rem; font-weight: 600; letter-spacing: .04em; padding: 4px 10px; border-radius: 999px;
+    background: rgba(6, 10, 16, .75); color: var(--soft); backdrop-filter: blur(6px); }
+  .pk__row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 14px; }
+  .pk__row h3 { margin: 0; font-size: 1.12rem; }
+  .pk__row h3 a { text-decoration: none; }
+  .pk__row h3 a:hover { color: var(--gold); }
+  .pk__price { color: var(--soft); font-weight: 500; }
+  .pk__sub { font-size: .86rem; color: var(--muted); margin: 4px 0 14px; flex: 1; }
+  .pk__btns { display: flex; gap: 8px; }
+  .pk__btns .btn:first-child { flex: 1; justify-content: center; }
+  .pk--feat .pk__img { box-shadow: 0 0 0 1px rgba(217, 184, 120, .55), 0 18px 40px -18px rgba(0, 0, 0, .7); }
+</style>

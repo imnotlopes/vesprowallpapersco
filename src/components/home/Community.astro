@@ -1,0 +1,66 @@
+---
+// Mural da comunidade em movimento (fotos de clientes + conversas reais), mesmo conteúdo da landing.
+// O aviso de tradução fica no rodapé da página (Base → footerNote).
+const photos = [
+  { f: 'cliente-setup-3-monitores', w: 900, h: 506, tag: 'SETUP', alt: 'Customer photo: three-monitor setup with VESPRO wallpapers' },
+  { f: 'foto-notebook', w: 700, h: 933, tag: 'LAPTOP', alt: 'VESPRO wallpaper on a laptop on a desk' },
+  { f: 'cliente-notebook-56', w: 900, h: 702, tag: 'LAPTOP', alt: 'Customer photo: VESPRO wallpaper on a laptop lock screen' },
+  { f: 'foto-setup', w: 1200, h: 900, tag: 'SETUP', alt: 'VESPRO wallpaper on a dual-monitor setup' },
+  { f: 'cliente-setup-gato', w: 900, h: 675, tag: 'SETUP', alt: 'Customer photo: gaming setup with a VESPRO wallpaper on two monitors' },
+  { f: 'foto-desktop', w: 700, h: 933, tag: 'LAPTOP', alt: 'VESPRO wallpaper on a laptop desktop' },
+  { f: 'foto-tablet', w: 700, h: 1242, tag: 'TABLET', alt: 'VESPRO wallpaper on a tablet screen' },
+];
+const chats = [
+  { f: 'chat-1', w: 1141, h: 1240, alt: 'Customer conversation: shares a photo of their laptop with the wallpaper and says they love it' },
+  { f: 'chat-3', w: 952, h: 1213, alt: 'Customer conversation: shares a video of their new wallpaper and says it looks amazing' },
+  { f: 'chat-2', w: 1197, h: 1160, alt: 'Customer conversation: says their PC looks much better' },
+  { f: 'chat-4', w: 949, h: 1658, alt: 'Customer conversation: shares their gaming setup and calls it the best wallpaper ever' },
+  { f: 'chat-5', w: 955, h: 1647, alt: 'Customer conversation: asks how the wallpapers are delivered and shares a laptop lock screen' },
+];
+const REPS = 4; // 2 metades iguais, cada uma mais larga que 2560px (o loop não abre buraco em telas grandes)
+---
+<section class="section" id="community" data-floaters-skip>
+  <div class="wrap center">
+    <p class="eyebrow">Community</p>
+    <h2>The VESPRO™ <em class="serif">community</em></h2>
+    <p class="lead">People who've given their screens a new look and shared the results.</p>
+  </div>
+  <div class="cm">
+    <div class="marquee" data-marquee="38">
+      <div class="marquee__track">
+        {Array.from({ length: REPS }).map((_, r) => photos.map((p) => (
+          <div class="cm__item" aria-hidden={r > 0 ? 'true' : undefined}>
+            <div class="cm__card cm__photo" style={`--r:${p.w}/${p.h}`}>
+              <img src={`/img/home/${p.f}.webp`} alt={r > 0 ? '' : p.alt} width={p.w} height={p.h} loading="lazy" decoding="async" />
+              <span class="cm__tag">{p.tag}</span>
+            </div>
+          </div>
+        )))}
+      </div>
+    </div>
+    <div class="marquee cm__row2" data-marquee="-30">
+      <div class="marquee__track">
+        {Array.from({ length: REPS }).map((_, r) => chats.map((c) => (
+          <div class="cm__item" aria-hidden={r > 0 ? 'true' : undefined}>
+            <div class="cm__card cm__chat" style={`--r:${c.w}/${c.h}`}>
+              <img src={`/img/home/${c.f}.webp`} alt={r > 0 ? '' : c.alt} width={c.w} height={c.h} loading="lazy" decoding="async" />
+            </div>
+          </div>
+        )))}
+      </div>
+    </div>
+  </div>
+  <p class="wrap center muted" style="margin-top:28px;font-size:.92rem">Snapped a photo of your screen? Send it to <a href="mailto:support@vesprowallpapers.com">support@vesprowallpapers.com</a> and we'll add it to the gallery.</p>
+</section>
+<style>
+  .cm { margin-top: 36px; }
+  .cm .marquee { -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+  .cm__row2 { margin-top: 16px; }
+  .cm__item { flex-shrink: 0; margin-right: 16px; }
+  .cm__card { position: relative; overflow: hidden; border-radius: 1rem; box-shadow: 0 0 0 1px rgba(255,255,255,.15), 0 25px 50px -12px rgba(0,0,0,.5); }
+  .cm__card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .cm__photo { height: 200px; width: calc(200px * var(--r)); }
+  .cm__chat { height: 380px; width: calc(380px * var(--r)); }
+  .cm__tag { position: absolute; top: 12px; left: 12px; font-size: 11px; letter-spacing: .15em; padding: 4px 10px; border-radius: 999px; background: rgba(6,10,16,.6); backdrop-filter: blur(4px); }
+  @media (min-width: 768px) { .cm__photo { height: 280px; width: calc(280px * var(--r)); } .cm__chat { height: 460px; width: calc(460px * var(--r)); } }
+</style>

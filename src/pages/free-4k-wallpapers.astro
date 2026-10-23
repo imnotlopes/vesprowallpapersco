@@ -1,0 +1,63 @@
+---
+import Hub from '../components/Hub.astro';
+import { PAGES } from '../data/pages';
+import { FREE_ITEMS } from '../data/wallpapers';
+const faq = [
+  { q: 'Is it really free?', a: 'Yes. Twelve full-resolution wallpapers, no payment and no account. We only need an email address to deliver the files.' },
+  { q: 'Will you send me marketing emails?', a: 'Only if you tick the box to hear about new releases. Otherwise we just send your download link.' },
+  { q: 'What resolution are the free wallpapers?', a: 'The same as the paid ones: 4K (3840 × 2160) for desktop and laptop.' },
+];
+---
+<Hub page={PAGES.free} eyebrow="VESPRO™ First Strokes"
+  h1='12 free 4K wallpapers <em class="serif">for your desktop</em>'
+  lead="Twelve oil painting wallpapers in full resolution, delivered to your inbox in seconds. No account needed."
+  items={FREE_ITEMS} faq={faq}>
+  <section style="margin-top:32px">
+    <form class="card free" data-free-form data-track="FreePackSubmit" novalidate>
+      <h2 style="font-size:1.5rem;margin-top:0">Send me the free pack</h2>
+      <label class="free__label" for="free-email">Email</label>
+      <input id="free-email" class="free__input" type="email" name="email" required autocomplete="email" placeholder="you@example.com" />
+      <label class="free__label" for="free-device">Which screen is it for?</label>
+      <select id="free-device" class="free__input" name="device">
+        <option value="mac">Mac / MacBook</option><option value="windows">Windows PC</option><option value="iphone">iPhone</option><option value="android">Android</option><option value="other">Something else</option>
+      </select>
+      <label class="free__check"><input type="checkbox" name="marketing" /> Also send me new wallpaper releases and early access (optional, unsubscribe anytime)</label>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="free__hp" aria-hidden="true" />
+      <button class="btn" type="submit">Email me the 12 wallpapers</button>
+      <p class="free__msg" role="status" aria-live="polite"></p>
+      <p class="muted" style="font-size:.8rem;margin:0">We use your email to deliver the files. See our <a href="/privacy">privacy policy</a>.</p>
+    </form>
+  </section>
+</Hub>
+<style>
+  .free { display: grid; gap: 10px; max-width: 560px; }
+  .free__label { font-size: .85rem; color: var(--soft); }
+  .free__input { width: 100%; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.2); background: rgba(6,10,16,.7); color: var(--fg); font: inherit; }
+  .free__check { display: flex; gap: 12px; align-items: flex-start; font-size: .88rem; color: var(--soft); margin: 6px 0; padding: 8px 0; cursor: pointer; }
+  .free__check input { margin-top: 1px; width: 20px; height: 20px; flex-shrink: 0; accent-color: #d9b878; }
+  .free__hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .free__msg { min-height: 1.2em; margin: 0; font-weight: 600; }
+  .free__msg.is-ok { color: #9fd99b; } .free__msg.is-err { color: #ff9b9b; }
+</style>
+<script is:inline>
+  (function () {
+    var f = document.querySelector('[data-free-form]'); if (!f) return;
+    var msg = f.querySelector('.free__msg'), btn = f.querySelector('button');
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = f.email.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.className = 'free__msg is-err'; msg.textContent = 'Please enter a valid email.'; return; }
+      var src = {}; try { src = JSON.parse(localStorage.getItem('vespro_src') || '{}').last || {}; } catch (x) {}
+      btn.disabled = true; msg.className = 'free__msg'; msg.textContent = 'Sending…';
+      fetch('/api/free-pack', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, device: f.device.value, marketing: f.marketing.checked, website: f.website.value, source: src.source || '' }) })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok && d.ok, d: d }; }); })
+        .then(function (r) {
+          if (r.ok) { msg.className = 'free__msg is-ok'; msg.textContent = 'Done! Check your inbox (and the spam folder) for your 12 wallpapers.'; f.email.value = ''; if (window.fbq) fbq('track', 'Lead', { content_name: 'Free pack' }); }
+          else { msg.className = 'free__msg is-err'; msg.textContent = (r.d && r.d.error) || 'Something went wrong. Please try again.'; }
+        })
+        .catch(function () { msg.className = 'free__msg is-err'; msg.textContent = 'Something went wrong. Please try again.'; })
+        .then(function () { btn.disabled = false; });
+    });
+  })();
+</script>
