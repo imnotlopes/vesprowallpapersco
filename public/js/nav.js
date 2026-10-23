@@ -2,6 +2,15 @@
  * e busca (baixa /search.json na primeira abertura). Esc fecha qualquer um; o foco volta para quem abriu. */
 (function () {
   var hover = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  // Barra do topo: transparente no início da página, sólida e clara depois de rolar
+  var hdr = document.querySelector('[data-hdr]');
+  if (hdr) {
+    var paint = function () { hdr.classList.toggle('is-scrolled', window.scrollY > 24); };   // só troca uma classe: barato o bastante para rodar a cada rolagem
+    window.addEventListener('scroll', paint, { passive: true });
+    window.addEventListener('pageshow', paint);
+    paint();
+  }
   var lockScroll = function (on) { document.documentElement.style.overflow = on ? 'hidden' : ''; };
 
   // Menu grande

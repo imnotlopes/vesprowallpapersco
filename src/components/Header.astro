@@ -134,8 +134,11 @@ const svg = (k: keyof typeof ICON, s = 22) =>
 
 <style is:global>
   /* global: os resultados da busca são criados pelo nav.js e não levam o escopo do Astro */
-  .hdr { position: sticky; top: 0; z-index: 30; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    background: rgba(6, 10, 16, 0.86); border-bottom: 1px solid var(--line); }
+  /* No topo da página a barra é transparente; ao rolar ganha fundo escuro sólido, sem mudar as cores do logo e dos textos
+     (nav.js põe .is-scrolled) */
+  .hdr { position: sticky; top: 0; z-index: 30; background: transparent; border-bottom: 1px solid transparent;
+    transition: background-color .3s ease, border-color .3s ease, box-shadow .3s ease; }
+  .hdr.is-scrolled { background: #060a10; border-bottom-color: var(--line); box-shadow: 0 12px 30px -16px rgba(0, 0, 0, .8); }
   .hdr__in { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; min-height: 76px; gap: 16px; }
   .hdr__start { display: none; gap: 4px; }
   .hdr__logo { display: flex; align-items: flex-start; text-decoration: none; justify-self: start; }
