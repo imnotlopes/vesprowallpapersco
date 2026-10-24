@@ -23,7 +23,7 @@ const canonical = new URL(page.path, SITE.url).href.replace(/\/$/, page.path ===
 const ogImage = new URL(image, SITE.url).href;
 const FONTS = 'https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap';
 const ld = [
-  { '@context': 'https://schema.org', '@type': 'Organization', name: SITE.name, url: SITE.url, logo: new URL('/img/brand/icon-512.png', SITE.url).href, email: SITE.email, sameAs: [SITE.instagram.url] },
+  { '@context': 'https://schema.org', '@type': 'Organization', name: SITE.name, url: SITE.url, logo: new URL('/img/brand/icon-512.png', SITE.url).href, email: SITE.email, sameAs: [SITE.instagram.url, SITE.tiktok.url, SITE.facebook.url].filter(Boolean) },
   ...(page.path === '/' ? [{ '@context': 'https://schema.org', '@type': 'WebSite', name: SITE.name, url: SITE.url }] : []),
   ...jsonLd,
 ];

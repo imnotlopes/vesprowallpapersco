@@ -2,7 +2,7 @@
 // Vitrine de packs (como a loja da referência): pack grátis, Coleção Completa e um card por tema,
 // cada um com "Buy" direto (Stripe) e "+ Cart". Mosaico com 4 prévias do tema.
 import { PRODUCTS, FREE_PACK, BRAND, formatPrice } from '../../api/_lib/products.js';
-import { WALLPAPERS, byCollection, preview, FREE_ITEMS, EDITIONS_LABEL } from '../data/wallpapers';
+import { WALLPAPERS, byCollection, preview, FREE_ITEMS, EDITIONS_LABEL, countLabel } from '../data/wallpapers';
 interface Props { back: string; }
 const { back } = Astro.props;
 const href = (key: string) => `/api/checkout?product=${key}&back=${encodeURIComponent(back.replace(/^\//, ''))}`;
@@ -29,10 +29,10 @@ const mosaic = (items: typeof WALLPAPERS) => items.slice(0, 4);
     <article class="pk">
       <a class="pk__img" href={p.page} aria-label={p.name}>
         {mosaic(items).map((w) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />)}
-        {items.length > 4 && <span class="pk__more">+{items.length - 4} more inside</span>}
+        {items.length > 4 && <span class="pk__more">{countLabel(items.length - 4)} more inside</span>}
       </a>
       <div class="pk__row"><h3><a href={p.page}>{p.name}</a></h3><span class="pk__price">{formatPrice(p.price)}</span></div>
-      <p class="pk__sub">{items.length} oil painting wallpapers in {p.hd ? 'HD' : '4K'}</p>
+      <p class="pk__sub">{countLabel(items.length)} oil painting wallpapers in {p.hd ? 'HD' : '4K'}</p>
       <div class="pk__btns">
         <a class="btn" href={href(key)} data-checkout data-track="ClickBuy" data-track-value={(p.price / 100).toFixed(2)} data-track-name={p.name}>Buy →</a>
         <button type="button" class="btn btn--ghost" data-add-to-cart={key}>+ Cart</button>
@@ -43,7 +43,7 @@ const mosaic = (items: typeof WALLPAPERS) => items.slice(0, 4);
   <article class="pk">
     <a class="pk__img" href="/free-4k-wallpapers" aria-label={FREE_PACK.name}>
       {mosaic(FREE_ITEMS).map((w) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />)}
-      <span class="pk__more">+{FREE_ITEMS.length - 4} more inside</span>
+      <span class="pk__more">{FREE_ITEMS.length - 4} more inside</span>
     </a>
     <div class="pk__row"><h3><a href="/free-4k-wallpapers">{BRAND} {FREE_PACK.collection}</a></h3><span class="pk__price">$0.00</span></div>
     <p class="pk__sub">{FREE_ITEMS.length} full-resolution wallpapers, delivered to your inbox</p>

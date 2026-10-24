@@ -1,43 +1,157 @@
 ---
+// Rodapé no padrão de loja: faixa de cadastro com imagem (pack grátis + novidades), quatro colunas
+// (marca, menu, links úteis e suporte) e a linha final com as formas de pagamento aceitas no checkout.
 import { FOOTER, SITE } from '../config';
+import { SOCIAL } from '../data/social';
+import PayBadges from './PayBadges.astro';
 const { note } = Astro.props as { note?: string };   // aviso específico da página (ex.: tradução das conversas na home)
 const year = new Date().getFullYear();
+// a faixa de cadastro some onde já existe formulário do pack grátis ou depois da compra
+const here = Astro.url.pathname.replace(/\.html$/, '');
+const showSignup = !['/free-4k-wallpapers', '/thank-you'].includes(here);
+// fundo da faixa: arte do pack grátis (já é distribuída de graça), por isso sem marca d'água e em resolução maior
+const bg = '/img/home/signup-lake-house.webp';
 ---
+{showSignup && (
+  <section class="signup" aria-labelledby="signup-title">
+    <div class="wrap">
+      <div class="signup__box" style={`--signup-bg:url(${bg})`}>
+        <div class="signup__txt">
+          <h2 id="signup-title">Stay close to the <em class="serif">easel</em></h2>
+          <p>Join our list and get 12 free 4K wallpapers right away, plus first looks at every new VESPRO™ edition.</p>
+          <form class="signup__form" data-signup novalidate>
+            <label class="signup__sr" for="signup-email">Email</label>
+            <input id="signup-email" name="email" type="email" placeholder="Enter your email" autocomplete="email" maxlength="254" required />
+            <input class="signup__hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            <button type="submit">Submit</button>
+          </form>
+          <p class="signup__fine">No spam. Unsubscribe anytime. <a href="/privacy">Privacy Policy</a></p>
+          <p class="signup__msg" data-signup-msg role="status"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+)}
+
 <footer class="ftr">
   <div class="wrap ftr__in">
     <div class="ftr__brand">
-      <img src="/img/brand/vespro-logo-240.webp" alt="VESPRO" width="240" height="212" loading="lazy" />
-      <p class="muted">Impasto oil painting wallpapers in 4K.<br />Questions? <a href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
-      <a class="ftr__social" href={SITE.instagram.url} target="_blank" rel="noopener" aria-label={`VESPRO on Instagram, ${SITE.instagram.handle}`}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor" stroke="none"/></svg>
-        <span>{SITE.instagram.handle}</span>
-      </a>
+      <p class="ftr__tagline">Your screen, <em class="serif">painted</em></p>
+      <p class="ftr__p">Impasto oil painting wallpapers for your laptop, desktop and phone. Thick brushstrokes, real texture, delivered in minutes.</p>
+      <ul class="ftr__social">
+        {SOCIAL.map((s) => (
+          <li><a class="ftr__ig" href={s.url || undefined} target={s.url ? '_blank' : undefined} rel={s.url ? 'noopener' : undefined}
+            aria-label={`VESPRO on ${s.name}${s.handle ? `, ${s.handle}` : ''}`} title={s.handle || s.name}>
+            <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true" set:html={s.svg} />
+          </a></li>
+        ))}
+      </ul>
     </div>
     {FOOTER.map((col) => (
-      <div>
+      <nav aria-label={col.title}>
         <p class="ftr__title">{col.title}</p>
         <ul>{col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
-      </div>
+      </nav>
     ))}
+    <div>
+      <p class="ftr__title">Support</p>
+      <p class="ftr__p">Our only support e-mail is:<br /><a class="ftr__mail" href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+      <p class="ftr__p"><a href="/contact">All the ways to reach us →</a></p>
+      <p class="ftr__p">A real person replies within one working day, Monday to Friday.</p>
+      <p class="ftr__p">Every purchase comes with a 14-day money-back guarantee. See our <a class="ftr__em" href="/refunds">refund policy</a>.</p>
+    </div>
   </div>
-  <p class="wrap ftr__legal muted">
-    © {year} VESPRO™. Previews are watermarked and downscaled; full-resolution files are delivered after download or purchase.
-    Personal use only. Commercial licenses available.
-  </p>
-  {note && <p class="wrap ftr__legal muted" style="margin-top:8px">{note}</p>}
+
+  <div class="wrap ftr__bottom">
+    <p>© {year} VESPRO™. All rights reserved.</p>
+    <PayBadges />
+  </div>
+  <p class="wrap ftr__legal">Previews are watermarked and downscaled; full-resolution files are delivered after purchase. Personal use only. Commercial licenses available.</p>
+  {note && <p class="wrap ftr__legal">{note}</p>}
 </footer>
 
+<script is:inline>
+  // Cadastro do rodapé: entrega o pack grátis e inscreve nas novidades (o objetivo da faixa é esse, e o aviso está ao lado)
+  (function () {
+    var f = document.querySelector('[data-signup]'); if (!f) return;
+    var msg = document.querySelector('[data-signup-msg]'), btn = f.querySelector('button');
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var email = f.email.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { msg.className = 'signup__msg is-err'; msg.textContent = 'Please enter a valid email.'; return; }
+      var src = {}; try { src = JSON.parse(localStorage.getItem('vespro_src') || '{}').last || {}; } catch (x) {}
+      btn.disabled = true; msg.className = 'signup__msg'; msg.textContent = 'Sending…';
+      fetch('/api/free-pack', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, marketing: true, website: f.website.value, source: 'footer' + (src.source ? ':' + src.source : '') }) })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok && d.ok, d: d }; }); })
+        .then(function (r) {
+          if (r.ok) {
+            msg.className = 'signup__msg is-ok'; msg.textContent = "You're in! Check your inbox (and spam) for your 12 free wallpapers."; f.email.value = '';
+            if (window.fbq) fbq('track', 'Lead', { content_name: 'Footer signup' });
+            if (window.vtrack) window.vtrack('FreePackSubmit', { content_name: 'footer' });
+          } else { msg.className = 'signup__msg is-err'; msg.textContent = (r.d && r.d.error) || 'Something went wrong. Please try again.'; }
+        })
+        .catch(function () { msg.className = 'signup__msg is-err'; msg.textContent = 'Something went wrong. Please try again.'; })
+        .then(function () { btn.disabled = false; });
+    });
+  })();
+</script>
+
 <style>
-  .ftr { border-top: 1px solid var(--line); padding: 48px 0 28px; margin-top: 40px; }
-  .ftr__in { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; }
-  .ftr__brand img { height: 64px; width: auto; margin-bottom: 12px; opacity: 0.92; }
-  .ftr__title { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
-  .ftr ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-  .ftr a { color: var(--soft); text-decoration: none; font-size: 0.9rem; }
-  .ftr a:hover { color: var(--gold); }
-  .ftr__legal { font-size: 0.78rem; margin-top: 32px; }
-  .ftr__social { display: inline-flex; align-items: center; gap: 8px; margin-top: 4px; min-height: 44px; padding: 8px 16px 8px 12px; border-radius: 999px;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18); }
-  .ftr__social:hover { box-shadow: inset 0 0 0 1px var(--gold); }
-  @media (max-width: 720px) { .ftr__in { grid-template-columns: 1fr 1fr; } .ftr__brand { grid-column: 1 / -1; } }
+  /* faixa de cadastro */
+  .signup { margin-top: 72px; }
+  .signup__box { position: relative; overflow: hidden; border-radius: 18px; min-height: 340px; display: flex; align-items: center;
+    background: linear-gradient(90deg, rgba(6, 10, 16, .92) 0%, rgba(6, 10, 16, .72) 42%, rgba(6, 10, 16, .1) 75%), var(--signup-bg) center / cover no-repeat;
+    box-shadow: 0 0 0 1px var(--line); }
+  .signup__txt { position: relative; max-width: 470px; padding: 44px 40px; }
+  .signup__txt h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: .35em; }
+  .signup__txt > p { color: var(--fg); margin-bottom: 22px; }
+  .signup__form { display: flex; align-items: flex-end; gap: 10px; border-bottom: 1px solid rgba(255, 255, 255, .45); padding-bottom: 8px; }
+  .signup__form input[type=email] { flex: 1; min-width: 0; background: none; border: 0; color: var(--fg); font: inherit; padding: 10px 0; outline: none; }
+  .signup__form input[type=email]::placeholder { color: rgba(255, 255, 255, .75); }
+  .signup__form button { flex-shrink: 0; background: #fff; color: #060a10; border: 0; padding: 12px 20px; min-height: 42px; cursor: pointer;
+    font: 700 .76rem/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+  .signup__form button:hover { background: var(--gold); }
+  .signup__form button[disabled] { opacity: .7; cursor: progress; }
+  .signup__hp, .signup__sr { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+  .signup__fine { font-size: .74rem; color: var(--soft); margin: 10px 0 0; }
+  .signup__fine a { color: var(--soft); }
+  .signup__msg { font-size: .86rem; margin: 10px 0 0; min-height: 1.2em; }
+  .signup__msg.is-ok { color: #8fe0b4; }
+  .signup__msg.is-err { color: #ff9b8a; }
+
+  /* rodapé */
+  .ftr { padding: 64px 0 28px; margin-top: 64px; border-top: 1px solid var(--line); }
+  .ftr__in { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.1fr; gap: 40px; }
+  .ftr__tagline { font-family: var(--serif); font-size: clamp(1.6rem, 2.6vw, 2.1rem); line-height: 1.15; color: var(--fg); margin: 0 0 16px; }
+  .ftr__tagline em { font-style: italic; }
+  .ftr__p { font-size: .92rem; color: var(--soft); margin: 0 0 14px; line-height: 1.6; }
+  .ftr__title { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--fg); font-weight: 700; margin: 6px 0 18px; }
+  .ftr ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
+  .ftr nav a { display: inline-block; padding: 7px 0; color: var(--soft); text-decoration: none; font-size: .78rem; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase; }
+  .ftr nav a:hover { color: var(--gold); }
+  .ftr__mail, .ftr__em { color: var(--fg); font-weight: 600; text-underline-offset: 3px; }
+  .ftr__em { font-style: italic; }
+  .ftr__mail:hover, .ftr__em:hover { color: var(--gold); }
+  .ftr .ftr__social { list-style: none; display: flex; gap: 4px; margin: 0 0 0 -10px; padding: 0; }
+  .ftr__ig { display: inline-grid; place-items: center; width: 44px; height: 44px; color: var(--fg); border-radius: 50%; }
+  .ftr__ig:not([href]) { cursor: default; }
+  .ftr__ig[href]:hover { color: var(--gold); background: rgba(255, 255, 255, .05); }
+  .ftr__bottom { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-top: 48px; padding-top: 22px;
+    border-top: 1px solid var(--line); }
+  .ftr__bottom p { margin: 0; font-size: .86rem; font-weight: 600; color: var(--fg); }
+  .ftr__legal { font-size: .74rem; color: var(--muted); margin: 16px auto 0; }
+
+  @media (max-width: 960px) {
+    .ftr__in { grid-template-columns: 1fr 1fr; }
+    .ftr__brand { grid-column: 1 / -1; }
+  }
+  @media (max-width: 640px) {
+    .signup { margin-top: 48px; }
+    .signup__box { min-height: 0; background: linear-gradient(180deg, rgba(6, 10, 16, .55), rgba(6, 10, 16, .94) 55%), var(--signup-bg) center top / cover no-repeat; }
+    .signup__txt { padding: 120px 22px 28px; }
+    .ftr__in { grid-template-columns: 1fr; gap: 28px; }
+    .ftr__bottom { flex-direction: column; align-items: flex-start; }
+  }
 </style>

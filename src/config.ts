@@ -7,6 +7,9 @@ export const SITE = {
     'Hand-finished impasto oil painting wallpapers in 4K for MacBook, PC, iPhone and ultrawide monitors. Instant download, personal license.',
   email: 'support@vesprowallpapers.com',
   instagram: { handle: '@vesprowallpapers.co', url: 'https://www.instagram.com/vesprowallpapers.co/' },
+  // redes do rodapé: TikTok e Facebook ainda vão ser criados; com url vazia o ícone aparece sem link
+  tiktok: { handle: '', url: '' },
+  facebook: { handle: '', url: '' },
   locale: 'en',
   ogImage: '/img/previews/d29.webp',
   metaPixelId: '1665089428567245',
@@ -19,6 +22,7 @@ export const NAV = [
   { href: '/collections/complete', label: 'VESPRO™ Editions' },
   { href: '/free-4k-wallpapers', label: 'Free Wallpapers' },
   { href: '/refunds', label: '14-Day Guarantee' },
+  { href: '/about', label: 'Our Story' },
 ];
 
 // Páginas por tela (menu grande, menu do celular e busca)
@@ -29,27 +33,32 @@ export const SCREENS = [
   { href: '/ultrawide-wallpapers', label: 'Ultrawide wallpapers', q: 'ultrawide 21:9 monitor 3440' },
 ];
 
+// Colunas do rodapé (a coluna "Support" com o e-mail fica fixa no Footer.astro)
 export const FOOTER = [
   {
-    title: 'Wallpapers',
+    title: 'Main menu',
     links: [
-      { href: '/oil-painting-wallpapers', label: 'Oil painting wallpapers' },
-      { href: '/macbook-wallpapers', label: 'MacBook wallpapers' },
-      { href: '/iphone-wallpapers', label: 'iPhone wallpapers' },
-      { href: '/4k-desktop-wallpapers', label: '4K desktop wallpapers' },
-      { href: '/ultrawide-wallpapers', label: 'Ultrawide wallpapers' },
-      { href: '/free-4k-wallpapers', label: 'Free 4K wallpapers' },
+      { href: '/wallpapers', label: 'Shop all wallpapers' },
+      { href: '/collections/complete', label: 'VESPRO™ Editions' },
+      { href: '/collections/signature', label: 'Signature' },
+      { href: '/collections/shadows', label: 'Shadows' },
+      { href: '/collections/sporting', label: 'Sporting' },
+      { href: '/free-4k-wallpapers', label: 'Free wallpapers' },
+      { href: '/about', label: 'Our story' },
     ],
   },
   {
-    title: 'VESPRO™',
+    title: 'Useful links',
     links: [
-      { href: '/collections/complete', label: 'VESPRO™ Editions' },
-      { href: '/get-my-links', label: 'Get my download links' },
+      { href: '/contact', label: 'Contact' },
+      { href: '/get-my-links', label: 'My downloads' },
+      { href: '/refunds', label: '14-day guarantee' },
       { href: '/license', label: 'License' },
-      { href: '/refunds', label: 'Refunds' },
-      { href: '/privacy', label: 'Privacy' },
-      { href: '/terms', label: 'Terms' },
+      { href: '/macbook-wallpapers', label: 'MacBook wallpapers' },
+      { href: '/4k-desktop-wallpapers', label: '4K desktop wallpapers' },
+      { href: '/iphone-wallpapers', label: 'iPhone wallpapers' },
+      { href: '/privacy', label: 'Privacy policy' },
+      { href: '/terms', label: 'Terms of service' },
     ],
   },
 ];

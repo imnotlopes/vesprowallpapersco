@@ -3,7 +3,7 @@
 // que cria a sessão no Stripe; track.js acrescenta a origem da visita (src) e dispara ClickBuy/ReachCheckout.
 // Layout pela largura do próprio bloco (container query): estreito = texto em cima e botões embaixo; largo = lado a lado.
 import { PRODUCTS, formatPrice } from '../../api/_lib/products.js';
-import { EDITIONS_LABEL } from '../data/wallpapers';
+import { EDITIONS_LABEL, countLabel } from '../data/wallpapers';
 interface Props { pack?: string | null; packCount?: number; back: string; title?: string; }
 const { pack, packCount = 0, back, title = 'Get the full-resolution files' } = Astro.props;
 const p = pack ? PRODUCTS[pack] : null;
@@ -16,7 +16,7 @@ const href = (key: string) => `/api/checkout?product=${key}&back=${encodeURIComp
     <div class="buy__item">
       <div class="buy__info">
         <b>{p.name}</b>
-        <span>{packCount} wallpapers in {p.hd ? 'HD' : '4K'} · <a href={p.page}>See the collection</a></span>
+        <span>{countLabel(packCount)} wallpapers in {p.hd ? 'HD' : '4K'} · <a href={p.page}>See the collection</a></span>
       </div>
       <div class="buy__btns">
         <a class="btn" href={href(pack!)} data-checkout data-track="ClickBuy" data-track-value={(p.price / 100).toFixed(2)} data-track-name={p.name}>Buy {formatPrice(p.price)}</a>

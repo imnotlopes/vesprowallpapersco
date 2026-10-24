@@ -58,7 +58,7 @@ do Stripe, ou peça o pack grátis com seu e-mail, antes de montar o fluxo.
 - Espera de **1 hora** → e-mail 1: "Your wallpapers are still waiting"
   - Itens: `{% for item in event.Items %}{{ item.ProductName }}{% endfor %}`
   - Botão "Finish my order" → `{{ event.CartURL }}` (reabre o carrinho no site com os mesmos packs)
-- Espera de **23 horas** → e-mail 2: mostre a Coleção Completa ("Get all 37 for $14.99").
+- Espera de **23 horas** → e-mail 2: ofereça o VESPRO™ Editions ("Get all 150+ for $14.99 with your cart"; o preço de carrinho vale quando há uma coleção junto).
 - O evento só existe para quem marcou a caixa de consentimento no carrinho.
 
 ### E) Boas-vindas da newsletter: trigger "Added to list" VESPRO™ Newsletter

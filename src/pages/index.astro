@@ -12,6 +12,8 @@ import { PAGES } from '../data/pages';
 import { WALLPAPERS, THEMES, byTheme, themeIndexable, preview } from '../data/wallpapers';
 import { PRODUCTS, formatPrice } from '../../api/_lib/products.js';
 const themes = Object.values(THEMES).filter((t) => themeIndexable(t.key));
+// nome no cartão do carrossel (plural onde o nome do tema é adjetivo: "Animal wallpapers" vira "Animals")
+const moodName = (t: { key: string; name: string }) => ({ animals: 'Animals', cars: 'Cars', cities: 'Cities' } as Record<string, string>)[t.key] || t.name;
 const picks = ['tall-ship-open-sea', 'snow-angel', 'galloping-horses', 'shark-school-of-fish', 'lake-house-golden-hour', 'couple-under-street-lamp']
   .map((s) => WALLPAPERS.find((w) => w.slug === s)!).filter(Boolean);
 ---
@@ -33,13 +35,25 @@ const picks = ['tall-ship-open-sea', 'snow-angel', 'galloping-horses', 'shark-sc
     <div class="wrap">
       <p class="eyebrow">Shop by theme</p>
       <h2>Pick a <em class="serif">mood</em></h2>
-      <div class="themes">
-        {themes.map((t) => (
-          <a class="themes__item" href={`/wallpapers/${t.key}`}>
-            <img src={preview(byTheme(t.key)[0], 400)} alt="" loading="lazy" width="400" height="225" />
-            <span>{t.name} wallpapers <small class="muted">· {byTheme(t.key).length}</small></span>
-          </a>
-        ))}
+      <div class="rail" data-rail>
+        <div class="rail__head">
+          <div class="rail__nav">
+            <button type="button" class="rail__btn" data-rail-prev aria-label="Previous themes">&#8592;</button>
+            <button type="button" class="rail__btn" data-rail-next aria-label="Next themes">&#8594;</button>
+          </div>
+        </div>
+        <ul class="rail__track" data-rail-track>
+          {themes.map((t) => (
+            <li>
+              <a class="mood" href={`/wallpapers/${t.key}`}>
+                <img src={preview(byTheme(t.key)[0], 800)} alt="" loading="lazy" width="800" height="450" />
+                <span class="mood__name">{moodName(t)}</span>
+                <span class="mood__cta">Explore</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+        <div class="rail__bar" aria-hidden="true"><span data-rail-bar></span></div>
       </div>
       <p style="margin-top:24px"><a class="btn btn--ghost" href="/collections/complete">Get VESPRO™ Editions, every wallpaper for {formatPrice(PRODUCTS.complete.price)}</a></p>
     </div>
@@ -57,13 +71,75 @@ const picks = ['tall-ship-open-sea', 'snow-angel', 'galloping-horses', 'shark-sc
   </section>
 
   <HomeFaq />
+  <script is:inline>
+    document.querySelectorAll('[data-rail]').forEach(function (rail) {
+      var track = rail.querySelector('[data-rail-track]'), prev = rail.querySelector('[data-rail-prev]'), next = rail.querySelector('[data-rail-next]');
+      var bar = rail.querySelector('[data-rail-bar]');
+      var step = function () { return Math.max(track.clientWidth * 0.8, 200); };
+      var sync = function () {
+        var max = track.scrollWidth - track.clientWidth;
+        prev.disabled = track.scrollLeft < 4; next.disabled = track.scrollLeft > max - 4;
+        var w = Math.min(1, track.clientWidth / track.scrollWidth);
+        bar.style.width = (w * 100) + '%';
+        bar.style.transform = 'translateX(' + (max > 0 ? (track.scrollLeft / max) * (1 / w - 1) * 100 : 0) + '%)';
+      };
+      prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
+      next.addEventListener('click', function () { track.scrollBy({ left: step(), behavior: 'smooth' }); });
+      track.addEventListener('scroll', sync, { passive: true }); window.addEventListener('resize', sync); sync();
+      // arrastar com o mouse (no toque o navegador já desliza sozinho)
+      var down = false, moved = false, x0 = 0, s0 = 0;
+      track.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' || e.button) return;
+        down = true; moved = false; x0 = e.clientX; s0 = track.scrollLeft;
+      });
+      window.addEventListener('pointermove', function (e) {
+        if (!down) return;
+        var dx = e.clientX - x0;
+        if (!moved && Math.abs(dx) > 5) { moved = true; track.classList.add('is-drag'); }
+        if (moved) track.scrollLeft = s0 - dx;
+      });
+      window.addEventListener('pointerup', function () {
+        if (!down) return; down = false;
+        if (moved) {
+          var li = track.children[0], w = li ? li.getBoundingClientRect().width + 14 : step();
+          var to = Math.round(track.scrollLeft / w) * w;
+          track.classList.remove('is-drag');
+          track.scrollTo({ left: to, behavior: 'smooth' });
+        }
+      });
+      track.addEventListener('click', function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
+      track.addEventListener('dragstart', function (e) { e.preventDefault(); });
+    });
+  </script>
   <script is:inline src="/js/home.js" defer></script>
 </Base>
 
 <style>
-  .themes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 24px; }
-  .themes__item { display: flex; flex-direction: column; gap: 8px; text-decoration: none; }
-  .themes__item img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border-radius: 12px; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
-  .themes__item span { font-weight: 600; color: var(--soft); }
-  .themes__item:hover span { color: var(--gold); }
+  .rail { position: relative; margin-top: 8px; }
+  .rail__head { display: flex; justify-content: flex-end; margin: -52px 0 16px; min-height: 40px; }
+  .rail__nav { display: flex; gap: 8px; }
+  .rail__btn { width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; font-size: 1.05rem; color: var(--soft);
+    background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); transition: color .2s, box-shadow .2s, opacity .2s; }
+  .rail__btn:hover { color: var(--gold); box-shadow: inset 0 0 0 1px rgba(217,184,120,.6); }
+  .rail__btn:disabled { opacity: .3; cursor: default; }
+  .rail__track { list-style: none; margin: 0; padding: 0 0 6px; display: grid; grid-auto-flow: column; grid-auto-columns: clamp(170px, 22vw, 250px); gap: 14px;
+    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .rail__track::-webkit-scrollbar { display: none; }
+  .rail__track li { scroll-snap-align: start; }
+  .rail__track.is-drag { scroll-snap-type: none; cursor: grabbing; }
+  .rail__track.is-drag a { pointer-events: none; }
+  .rail__bar { position: relative; height: 3px; margin-top: 14px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .rail__bar span { position: absolute; inset: 0 auto 0 0; width: 30%; border-radius: 3px; background: var(--gold); transition: transform .15s linear; }
+  .mood { position: relative; display: block; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; text-decoration: none;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12); isolation: isolate; }
+  .mood img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; z-index: -2; }
+  .mood::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(4,7,12,.92) 0%, rgba(4,7,12,.35) 42%, rgba(4,7,12,0) 70%); }
+  .mood__name { position: absolute; left: 16px; right: 16px; bottom: 40px; font-family: var(--serif, Georgia, serif); font-size: 1.35rem; line-height: 1.15; color: #fff; }
+  .mood__cta { position: absolute; left: 16px; bottom: 16px; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .mood:hover img { transform: scale(1.06); }
+  .mood:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  @media (max-width: 640px) {
+    .rail__btn { width: 36px; height: 36px; }
+    .rail__track { grid-auto-columns: 62%; margin: 0 -16px; padding: 0 16px 6px; scroll-padding-left: 16px; }
+  }
 </style>

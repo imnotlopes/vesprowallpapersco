@@ -1,5 +1,5 @@
 /* Carrinho VESPRO: coleções guardadas no navegador (localStorage), gaveta lateral e checkout por POST em /api/checkout.
- *   [data-add-to-cart="ocean"]  adiciona e abre o carrinho        [data-cart-open]  abre o carrinho
+ *   [data-add-to-cart="ocean"]  adiciona e abre o carrinho (aceita várias: "ocean,complete")        [data-cart-open]  abre o carrinho
  *   ?cart=ocean,cities na URL   recupera o carrinho (link do e-mail de carrinho abandonado)
  * Ofertas (o servidor recalcula tudo em quote(); aqui é só para mostrar o mesmo número):
  *   combo   3+ coleções no carrinho com desconto em cada
@@ -161,7 +161,7 @@
   document.addEventListener('click', function (e) {
     var el = e.target.closest && e.target.closest('[data-add-to-cart],[data-cart-open],[data-cart-close],[data-remove],[data-add],[data-cart-all]');
     if (!el) return;
-    if (el.hasAttribute('data-add-to-cart')) { e.preventDefault(); add(el.getAttribute('data-add-to-cart')); open(); }
+    if (el.hasAttribute('data-add-to-cart')) { e.preventDefault(); el.getAttribute('data-add-to-cart').split(',').forEach(add); open(); }
     else if (el.hasAttribute('data-cart-open')) { e.preventDefault(); note(''); render(); open(); }
     else if (el.hasAttribute('data-cart-close')) close();
     else if (el.hasAttribute('data-remove')) { var k = el.getAttribute('data-remove'); cart = cart.filter(function (x) { return x !== k; }); note(''); save(); render(); }
@@ -209,7 +209,7 @@
   if (bump) {
     window.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('a[data-checkout]');
-      if (!a || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
+      if (!a || a.hasAttribute('data-no-bump') || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
       var href = a.getAttribute('href') || '', m = href.match(/[?&]product=([a-z-]+)/), k = m && m[1];
       if (!k || !CAT[k] || CAT[k].kind !== 'pack' || declined()) return;
       e.preventDefault(); e.stopPropagation();

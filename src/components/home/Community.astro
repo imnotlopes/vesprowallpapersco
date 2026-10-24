@@ -17,14 +17,18 @@ const chats = [
   { f: 'chat-4', w: 949, h: 1658, alt: 'Customer conversation: shares their gaming setup and calls it the best wallpaper ever' },
   { f: 'chat-5', w: 955, h: 1647, alt: 'Customer conversation: asks how the wallpapers are delivered and shares a laptop lock screen' },
 ];
+interface Props { bare?: boolean; }
+const { bare = false } = Astro.props;
 const REPS = 4; // 2 metades iguais, cada uma mais larga que 2560px (o loop não abre buraco em telas grandes)
 ---
-<section class="section" id="community" data-floaters-skip>
-  <div class="wrap center">
-    <p class="eyebrow">Community</p>
-    <h2>The VESPRO™ <em class="serif">community</em></h2>
-    <p class="lead">People who've given their screens a new look and shared the results.</p>
-  </div>
+<section class:list={[{ section: !bare }]} id={bare ? undefined : 'community'} data-floaters-skip>
+  {!bare && (
+    <div class="wrap center">
+      <p class="eyebrow">Community</p>
+      <h2>The VESPRO™ <em class="serif">community</em></h2>
+      <p class="lead">People who've given their screens a new look and shared the results.</p>
+    </div>
+  )}
   <div class="cm">
     <div class="marquee" data-marquee="38">
       <div class="marquee__track">
@@ -50,7 +54,7 @@ const REPS = 4; // 2 metades iguais, cada uma mais larga que 2560px (o loop não
       </div>
     </div>
   </div>
-  <p class="wrap center muted" style="margin-top:28px;font-size:.92rem">Snapped a photo of your screen? Send it to <a href="mailto:support@vesprowallpapers.com">support@vesprowallpapers.com</a> and we'll add it to the gallery.</p>
+  {!bare && <p class="wrap center muted" style="margin-top:28px;font-size:.92rem">Snapped a photo of your screen? Send it to <a href="mailto:support@vesprowallpapers.com">support@vesprowallpapers.com</a> and we'll add it to the gallery.</p>}
 </section>
 <style>
   .cm { margin-top: 36px; }

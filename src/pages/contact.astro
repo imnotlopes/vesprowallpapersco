@@ -1,0 +1,89 @@
+---
+// Contato: e-mail único de atendimento (sem telefone nem endereço), com atalhos por assunto.
+// Os cartões abrem o e-mail com o assunto já preenchido; "perdi meu link" vai direto para o reenvio automático.
+import Base from '../layouts/Base.astro';
+import { PAGES } from '../data/pages';
+import { SITE } from '../config';
+import { SOCIAL } from '../data/social';
+
+const mail = (subject: string) => `mailto:${SITE.email}?subject=${encodeURIComponent(subject)}`;
+const topics = [
+  { t: 'I lost my download links', d: 'Get them again in seconds, no need to wait for us.', href: '/get-my-links', cta: 'Resend my links' },
+  { t: 'Order or refund', d: 'Something wrong with a purchase? Tell us your order email.', href: mail('Order help'), cta: 'Email us' },
+  { t: 'Commercial license', d: 'Using VESPRO™ paintings in a product, store, app or campaign.', href: mail('Commercial license'), cta: 'Ask about a license' },
+  { t: 'Press and collaborations', d: 'Features, partnerships and creator collaborations.', href: mail('Press and collaborations'), cta: 'Get in touch' },
+];
+const social = SOCIAL.filter((s) => s.url);
+---
+<Base page={PAGES.contact} pageType="page">
+  <section class="section ct">
+    <div class="wrap">
+      <div class="ct-head">
+        <p class="eyebrow">Contact</p>
+        <h1>Talk to <em class="serif">a real person</em></h1>
+        <p class="lead">Questions about a download, an order or a license? Write to us. We read every message and reply within one working day, Monday to Friday.</p>
+      </div>
+
+      <div class="ct-mail">
+        <div>
+          <p class="ct-mail__label">Our only support e-mail</p>
+          <a class="ct-mail__addr" href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </div>
+        <div class="ct-mail__btns">
+          <a class="btn" href={`mailto:${SITE.email}`}>Write to us</a>
+          <button type="button" class="btn btn--ghost" data-copy={SITE.email}>Copy e-mail</button>
+        </div>
+      </div>
+
+      <h2 class="ct-sub">What can we help with?</h2>
+      <ul class="ct-topics">
+        {topics.map((x) => (
+          <li><a href={x.href}><b>{x.t}</b><span>{x.d}</span><em>{x.cta} →</em></a></li>
+        ))}
+      </ul>
+
+      <div class="ct-foot">
+        <p>Before you write, these might answer it: <a href="/refunds">14-day guarantee</a> · <a href="/license">License</a> · <a href="/collections/complete#faq">Editions FAQ</a></p>
+        {social.length > 0 && <p>Follow along: {social.map((s, i) => <>{i > 0 && ' · '}<a href={s.url} target="_blank" rel="noopener">{s.name} {s.handle}</a></>)}</p>}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+  document.querySelectorAll('[data-copy]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var label = b.textContent, done = function () { b.textContent = 'Copied'; setTimeout(function () { b.textContent = label; }, 1800); };
+      if (navigator.clipboard) navigator.clipboard.writeText(b.getAttribute('data-copy')).then(done, function () {});
+    });
+  });
+</script>
+
+<style>
+  .ct-head { max-width: 720px; }
+  .ct-head h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); }
+  .ct-mail { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; margin-top: 36px; padding: 28px 32px; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(217,184,120,.12), rgba(11,17,24,.7)); box-shadow: inset 0 0 0 1px rgba(217,184,120,.45); }
+  .ct-mail__label { margin: 0 0 6px; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; font-weight: 600; color: var(--muted); }
+  .ct-mail__addr { font-size: clamp(1rem, 4.4vw, 1.9rem); font-weight: 600; color: var(--fg); text-decoration: none; white-space: nowrap; }
+  .ct-mail__addr:hover { color: var(--gold); }
+  .ct-mail__btns { display: flex; gap: 10px; }
+  .ct-mail__btns .btn { justify-content: center; white-space: nowrap; }
+  .ct-sub { font-size: clamp(1.4rem, 3vw, 1.9rem); margin: 56px 0 18px; }
+  .ct-topics { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .ct-topics a { display: grid; gap: 6px; height: 100%; padding: 22px 24px; border-radius: 14px; text-decoration: none;
+    background: rgba(11,17,24,.66); box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow .2s; }
+  .ct-topics a:hover { box-shadow: inset 0 0 0 1px rgba(217,184,120,.55); }
+  .ct-topics b { font-size: 1.05rem; font-weight: 600; color: var(--fg); }
+  .ct-topics span { font-size: .9rem; color: var(--muted); }
+  .ct-topics em { font-style: normal; font-size: .88rem; font-weight: 600; color: var(--gold); margin-top: 6px; }
+  .ct-foot { margin-top: 40px; padding-top: 22px; border-top: 1px solid var(--line); }
+  .ct-foot p { font-size: .9rem; color: var(--muted); margin: 0 0 8px; }
+  .ct-foot a { color: var(--soft); }
+  @media (max-width: 700px) {
+    .ct-mail { padding: 22px 20px; }
+    .ct-mail__btns { width: 100%; }
+    .ct-mail__btns .btn { flex: 1; padding-inline: 12px; font-size: .8rem; }
+    .ct-topics { grid-template-columns: 1fr; }
+  }
+</style>

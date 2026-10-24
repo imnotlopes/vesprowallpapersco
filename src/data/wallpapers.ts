@@ -453,6 +453,9 @@ export const EDITIONS_COUNT = WALLPAPERS.length + HIDDEN_TOTAL;
 /** Como o site fala do tamanho do VESPRO™ Editions: sem número exato, porque cresce a cada edição. */
 export const EDITIONS_LABEL = '150+';
 if (EDITIONS_COUNT < 150) throw new Error(`EDITIONS_LABEL diz 150+, mas o Editions tem ${EDITIONS_COUNT} obras`);
+/** Quantidade de obras como o site mostra: nada de número quebrado. Abaixo de 10 fica exato; múltiplo de 5 fica como está;
+ *  o resto arredonda para baixo, de 5 em 5, com "+" (38 vira "35+", 78 vira "75+"). */
+export const countLabel = (n: number) => (n < 10 || n % 5 === 0 ? String(n) : `${Math.floor(n / 5) * 5}+`);
 
 export const preview = (w: Wallpaper, size: 800 | 400 = 800) => (size === 800 ? `/img/w/${w.slug}.webp` : `/img/w/400/${w.slug}.webp`);
 export const byTheme = (key: ThemeKey) => WALLPAPERS.filter((w) => w.theme === key);

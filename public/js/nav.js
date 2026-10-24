@@ -1,4 +1,4 @@
-/* Topo VESPRO™: menu grande de "Wallpapers" (abre no hover em computador e no clique), menu lateral do celular
+/* Topo VESPRO™: menu grande de "Wallpapers" (abre no hover em computador e no clique), menu do celular (painel que sobe de baixo, com submenu de coleções)
  * e busca (baixa /search.json na primeira abertura). Esc fecha qualquer um; o foco volta para quem abriu. */
 (function () {
   var hover = window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
@@ -58,7 +58,14 @@
   }
 
   var mnav = document.querySelector('[data-mnav]');
-  panel(mnav, '[data-mnav-open]', '[data-mnav-close], [data-mnav] a', function () { mnav.querySelector('.mnav__panel').focus(); });
+  if (mnav) {
+    // submenu "Wallpapers": desliza para o lado; volta ao menu principal sempre que o painel abre
+    var views = mnav.querySelector('[data-mnav-views]'), subBtn = mnav.querySelector('[data-mnav-sub]'), back = mnav.querySelector('[data-mnav-back]');
+    var setSub = function (on) { views.classList.toggle('is-sub', on); subBtn.setAttribute('aria-expanded', on ? 'true' : 'false'); };
+    subBtn.addEventListener('click', function () { setSub(true); setTimeout(function () { back.focus(); }, 280); });
+    back.addEventListener('click', function () { setSub(false); subBtn.focus(); });
+    panel(mnav, '[data-mnav-open]', '[data-mnav-close], [data-mnav] a[href]', function () { setSub(false); mnav.querySelector('.mnav__panel').focus(); });
+  }
 
   // Busca
   var srch = document.querySelector('[data-search]');

@@ -3,7 +3,9 @@
 // obras do mesmo tema e metadados de licença (selo "Licensable" no Google Imagens).
 import Base from '../../layouts/Base.astro';
 import WallGrid from '../../components/WallGrid.astro';
-import BuyBox from '../../components/BuyBox.astro';
+import Gallery from '../../components/Gallery.astro';
+import ProductPanel from '../../components/ProductPanel.astro';
+import { PRODUCTS } from '../../../api/_lib/products.js';
 import { SITE } from '../../config';
 import { WALLPAPERS, THEMES, preview, byTheme, byCollection, themeIndexable } from '../../data/wallpapers';
 import type { Wallpaper } from '../../data/wallpapers';
@@ -18,6 +20,10 @@ const res = w.hd ? 'HD' : '4K';
 const related = byTheme(w.theme).filter((x) => x.slug !== w.slug).slice(0, 6);
 const more = related.length < 3 ? WALLPAPERS.filter((x) => x.theme !== w.theme).slice(0, 6 - related.length) : [];
 const path = `/wallpaper/${w.slug}`;
+// galeria: a obra primeiro, depois outras da mesma coleção (ou do mesmo tema, se for exclusiva do Editions)
+const siblings = (pack ? byCollection(pack) : byTheme(w.theme)).filter((x) => x.slug !== w.slug).slice(0, 7);
+const gallery = [w, ...siblings].map((x) => ({ src: preview(x), thumb: preview(x, 400), alt: `${x.title}, oil painting wallpaper preview` }));
+const eyebrow = `${theme.name} wallpaper · ${pack ? `${PRODUCTS[pack].collection} ${PRODUCTS[pack].edition}` : 'Editions exclusive'}`;
 const page = {
   path,
   title: `${w.title}: Oil Painting Wallpaper in ${res} | VESPRO™`,
@@ -47,29 +53,30 @@ const jsonLd = [
 ];
 ---
 <Base page={page} pageType="wallpaper" image={preview(w)} jsonLd={jsonLd}>
-  <article class="section">
+  <article class="section pdp">
     <div class="wrap">
       <nav class="crumbs" aria-label="Breadcrumb">
         <a href="/wallpapers">Wallpapers</a> / <a href={themeLink}>{theme.name} wallpapers</a> / <span>{w.title}</span>
       </nav>
-      <div class="art">
-        <figure class="art__img">
-          <img src={preview(w)} alt={`${w.title}, oil painting wallpaper preview`} width="800" height="450" fetchpriority="high" />
-          <figcaption class="muted">Preview is watermarked and downscaled. The download is full resolution, without watermark.</figcaption>
-        </figure>
-        <div class="art__info">
-          <p class="eyebrow">{theme.name} · oil painting wallpaper</p>
-          <h1>{w.title}</h1>
-          <p>{w.description}</p>
-          <ul class="specs">
-            <li><b>Desktop & laptop:</b> {w.hd ? 'HD, 1672 × 941 (16:9)' : '4K, 3840 × 2160 (16:9)'}</li>
-            <li><b>Works on:</b> Windows PCs, MacBook and iMac, monitors</li>
-            <li><b>Style:</b> impasto oil painting, visible brushstrokes</li>
-            <li><b>License:</b> <a href="/license">personal use</a></li>
-          </ul>
-          <BuyBox pack={pack} packCount={pack ? byCollection(pack).length : 0} back={path} title="Get this wallpaper in full resolution" />
-          <p class="muted" style="font-size:.88rem;margin-top:12px">Not ready to buy? <a href="/free-4k-wallpapers" data-track="ClickFreePack">Get 12 free wallpapers</a> first.</p>
-        </div>
+      <div class="pdp__grid">
+        <Gallery items={gallery} note="Previews are watermarked and downscaled. Your download is full resolution, without watermark." />
+        <ProductPanel eyebrow={eyebrow} pack={pack} packCount={pack ? byCollection(pack).length : 0} back={path} sub={w.description}>
+          <h1 slot="title">{w.title}</h1>
+          {pack && <p class="incl">This painting comes in <a href={PRODUCTS[pack].page}>{PRODUCTS[pack].name}</a>.</p>}
+          <div class="pdp__acc">
+            <details open><summary>Specs</summary>
+              <ul class="specs">
+                <li><b>Desktop & laptop:</b> {w.hd ? 'HD, 1672 × 941 (16:9)' : '4K, 3840 × 2160 (16:9)'}</li>
+                <li><b>Works on:</b> Windows PCs, MacBook and iMac, monitors</li>
+                <li><b>Style:</b> impasto oil painting, visible brushstrokes</li>
+              </ul></details>
+            <details><summary>License</summary>
+              <p>Personal use on your own devices. No reselling or sharing. <a href="/license">Read the license</a>.</p></details>
+            <details><summary>Guarantee</summary>
+              <p>Not in love with it? Email us within 14 days and we refund you in full. <a href="/refunds">Refund policy</a>.</p></details>
+          </div>
+          <p class="muted free">Not ready to buy? <a href="/free-4k-wallpapers" data-track="ClickFreePack">Get 12 free wallpapers</a> first.</p>
+        </ProductPanel>
       </div>
     </div>
   </article>
@@ -84,15 +91,12 @@ const jsonLd = [
 </Base>
 
 <style>
-  .crumbs { font-size: .85rem; color: var(--muted); margin-bottom: 10px; }
+  .crumbs { font-size: .85rem; color: var(--muted); margin-bottom: 6px; }
   .crumbs a { color: var(--muted); display: inline-block; padding: 10px 0; }
-  .art { display: grid; grid-template-columns: 1.5fr 1fr; gap: 36px; align-items: start; }
-  .art__img { margin: 0; }
-  .art__img img { width: 100%; border-radius: 14px; box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 40px 80px -30px rgba(0,0,0,.8); }
-  .art__img figcaption { font-size: .8rem; margin-top: 10px; }
-  .art__info h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); }
-  .specs { padding-left: 1.1em; margin: 0 0 22px; }
-  .specs li { color: var(--soft); margin-bottom: 6px; font-size: .95rem; }
+  .incl { font-size: .88rem; color: var(--muted); margin: 14px 0 0; text-align: center; }
+  .incl a, .free a { color: var(--gold); }
+  .specs { padding-left: 1.1em; margin: 0 0 16px; }
+  .specs li { color: var(--soft); margin-bottom: 6px; font-size: .92rem; }
   .specs b { color: var(--fg); font-weight: 600; }
-  @media (max-width: 860px) { .art { grid-template-columns: 1fr; } }
+  .free { font-size: .88rem; margin-top: 18px; }
 </style>

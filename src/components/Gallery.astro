@@ -1,0 +1,97 @@
+---
+// Galeria da página de produto: foto grande com setas e contador, miniaturas ao lado (desktop) ou embaixo (celular).
+// No celular a foto grande desliza com o dedo (scroll-snap); o script só sincroniza contador, setas e miniatura ativa.
+interface Props { items: { src: string; thumb: string; alt: string }[]; note?: string; }
+const { items, note } = Astro.props;
+---
+<div class="gal" data-gal>
+  <div class="gal__main">
+    <ul class="gal__track" data-gal-track>
+      {items.map((it, i) => (
+        <li><img src={it.src} alt={it.alt} width="800" height="450" loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : 'auto'} decoding="async" /></li>
+      ))}
+    </ul>
+    {items.length > 1 && (
+      <>
+        <button type="button" class="gal__arrow gal__arrow--prev" data-gal-prev aria-label="Previous image">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+        </button>
+        <button type="button" class="gal__arrow gal__arrow--next" data-gal-next aria-label="Next image">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        </button>
+        <span class="gal__count" aria-live="polite"><b data-gal-now>1</b> / {items.length}</span>
+      </>
+    )}
+  </div>
+  {items.length > 1 && (
+    <ul class="gal__thumbs" aria-label="Choose an image">
+      {items.map((it, i) => (
+        <li><button type="button" data-gal-go={i} aria-label={`Show image ${i + 1}`} aria-current={i === 0 ? 'true' : undefined}>
+          <img src={it.thumb} alt="" width="400" height="225" loading="lazy" decoding="async" />
+        </button></li>
+      ))}
+    </ul>
+  )}
+  {note && <p class="gal__note muted">{note}</p>}
+</div>
+
+<script is:inline>
+  document.querySelectorAll('[data-gal]').forEach(function (g) {
+    var track = g.querySelector('[data-gal-track]'), now = g.querySelector('[data-gal-now]');
+    var thumbs = g.querySelectorAll('[data-gal-go]'), n = track.children.length, cur = 0;
+    if (n < 2) return;
+    var show = function (i) {
+      cur = (i + n) % n;
+      track.scrollTo({ left: cur * track.clientWidth, behavior: 'smooth' });
+      sync(cur);
+    };
+    var sync = function (i) {
+      if (now) now.textContent = i + 1;
+      thumbs.forEach(function (t, k) {
+        if (k === i) { t.setAttribute('aria-current', 'true'); t.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }
+        else t.removeAttribute('aria-current');
+      });
+    };
+    g.querySelector('[data-gal-prev]').addEventListener('click', function () { show(cur - 1); });
+    g.querySelector('[data-gal-next]').addEventListener('click', function () { show(cur + 1); });
+    thumbs.forEach(function (t) { t.addEventListener('click', function () { show(+t.getAttribute('data-gal-go')); }); });
+    track.addEventListener('scroll', function () {
+      var i = Math.round(track.scrollLeft / track.clientWidth);
+      if (i !== cur) { cur = i; sync(i); }
+    }, { passive: true });
+  });
+</script>
+
+<style>
+  .gal { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: start; }
+  .gal__main { position: relative; grid-column: 2; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 40px 80px -30px rgba(0,0,0,.8); }
+  .gal__track { list-style: none; margin: 0; padding: 0; display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+    scrollbar-width: none; overscroll-behavior-x: contain; }
+  .gal__track::-webkit-scrollbar { display: none; }
+  .gal__track li { flex: 0 0 100%; scroll-snap-align: start; }
+  .gal__track img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .gal__arrow { position: absolute; top: 50%; translate: 0 -50%; width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer;
+    display: grid; place-items: center; color: #10151c; background: rgba(255,255,255,.92); box-shadow: 0 6px 18px -6px rgba(0,0,0,.6); transition: transform .15s; }
+  .gal__arrow:hover { transform: scale(1.06); }
+  .gal__arrow--prev { left: 12px; }
+  .gal__arrow--next { right: 12px; }
+  .gal__count { position: absolute; right: 12px; bottom: 12px; padding: 4px 11px; border-radius: 999px; font-size: .8rem;
+    color: #10151c; background: rgba(255,255,255,.92); }
+  .gal__thumbs { grid-column: 1; grid-row: 1; list-style: none; margin: 0; padding: 2px; display: flex; flex-direction: column; gap: 10px;
+    height: 0; min-height: 100%; overflow-y: auto; scrollbar-width: none; }
+  .gal__thumbs::-webkit-scrollbar { display: none; }
+  .gal__thumbs button { display: block; width: 100%; padding: 0; border: 0; border-radius: 9px; overflow: hidden; cursor: pointer; background: none;
+    opacity: .55; box-shadow: 0 0 0 1px rgba(255,255,255,.14); transition: opacity .2s, box-shadow .2s; }
+  .gal__thumbs button:hover { opacity: .85; }
+  .gal__thumbs button[aria-current] { opacity: 1; box-shadow: 0 0 0 2px var(--gold); }
+  .gal__thumbs img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .gal__note { grid-column: 2; font-size: .8rem; margin: 2px 0 0; }
+  @media (max-width: 860px) {
+    .gal { grid-template-columns: minmax(0, 1fr); }
+    .gal__main, .gal__note { grid-column: 1; }
+    .gal__thumbs { grid-row: 2; flex-direction: row; height: auto; min-height: 0; overflow: auto hidden; }
+    .gal__thumbs li { flex: 0 0 76px; }
+  }
+  @media (max-width: 560px) { .gal__arrow { width: 36px; height: 36px; } }
+</style>

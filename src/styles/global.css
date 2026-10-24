@@ -83,3 +83,22 @@ main > :not(.flt) { position: relative; z-index: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .flt__item { animation: none; } }
 @media (max-width: 767px) { .flt { display: none; } }
+
+/* Página de produto (coleções e obras): galeria + painel de compra, e sanfona de detalhes */
+.pdp { padding-top: 28px; }
+.pdp__grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 44px; align-items: start; }
+.pdp__grid > :first-child { position: sticky; top: 96px; }
+.pdp__acc { margin-top: 26px; border-top: 1px solid var(--line); }
+.pdp__acc details { border-bottom: 1px solid var(--line); }
+.pdp__acc summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; padding: 16px 0;
+  font-size: .8rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.pdp__acc summary::-webkit-details-marker { display: none; }
+.pdp__acc summary::after { content: '+'; font-size: 1.2rem; font-weight: 400; color: var(--muted); }
+.pdp__acc details[open] summary::after { content: '−'; }
+.pdp__acc p { margin: 0 0 16px; font-size: .92rem; color: var(--soft); }
+.pdp__acc a { color: var(--gold); }
+@media (max-width: 860px) {
+  .pdp { padding-top: 12px; }
+  .pdp__grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .pdp__grid > :first-child { position: static; }
+}

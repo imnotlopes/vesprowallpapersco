@@ -1,0 +1,257 @@
+---
+// Our Story: página editorial da marca (manifesto, capítulos sobre a técnica e o modelo de edições, crenças, origem).
+// Sem números inventados: nada de "fundada em", contagem de clientes ou nomes de pessoas.
+import Base from '../layouts/Base.astro';
+import Community from '../components/home/Community.astro';
+import { PAGES } from '../data/pages';
+import { SITE } from '../config';
+import { WALLPAPERS, preview, EDITIONS_LABEL } from '../data/wallpapers';
+import { PRODUCTS } from '../../api/_lib/products.js';
+
+const w = (slug: string) => WALLPAPERS.find((x) => x.slug === slug)!;
+// as melhores do catálogo, sem logos de marca nem pessoas reconhecíveis
+const hero = w('tennis-court-and-yacht-at-night');
+const names = Object.values(PRODUCTS).filter((p) => p.kind === 'pack').map((p) => p.collection);
+const chapters = [
+  {
+    n: '01', title: 'Why oil paint', img: w('surfer-carving-the-wave'),
+    body: [
+      'Impasto is the old technique of laying paint on so thick that it keeps the shape of the brush. It catches light. It has ridges, edges and small happy accidents.',
+      'On a bright, flat, modern screen, that texture does something a photo can\'t: it gives your eye somewhere to rest. It feels less like a file and more like an object.',
+    ],
+  },
+  {
+    n: '02', title: 'How an edition comes together', img: w('red-sports-car-in-santorini'),
+    body: [
+      'Every edition starts as a list of scenes we would want to live inside for a while: a harbour at golden hour, a rainy street at night, a car parked somewhere it has no business being that beautiful.',
+      'Each painting is composed for a 16:9 screen first, so nothing important hides behind your icons, your dock or your menu bar. Then it is finished in thick impasto and checked on real screens, from MacBooks to 4K monitors, before it joins a collection.',
+    ],
+  },
+  {
+    n: '03', title: 'Why we work in editions', img: w('villa-tennis-court-riviera'),
+    body: [
+      `We release our work the way printmakers do, in editions. Each one has a name, a theme and a mood: ${names.slice(0, 3).join(', ')}, and more.`,
+      `Pick the edition that feels like you, or get VESPRO™ Editions and receive every painting we have made, ${EDITIONS_LABEL} so far, plus every edition we release from now on.`,
+    ],
+  },
+];
+const selected = ['portofino-harbour', 'japanese-castle-full-moon', 'pink-tennis-court-in-the-jungle', 'yachts-on-deep-blue-water',
+  'tall-ship-through-the-rope', 'wanderer-in-the-tea-fields', 'red-window-to-the-sea', 'couple-walking-in-the-rain'].map(w);
+const beliefs = [
+  { t: 'Made to be lived with', d: 'Quiet enough for a long work day, rich enough to stop you for a second when you open your laptop.' },
+  { t: 'Pay once, keep forever', d: 'No subscriptions and no accounts to manage. You download the files and they are yours.' },
+  { t: 'A person on the other side', d: 'Write to us and a real person replies, usually within one working day.' },
+];
+---
+<Base page={PAGES.about} pageType="page" footerNote="Real customer conversations, translated from Portuguese. Some setup photos are for illustration.">
+  <!-- Abertura -->
+  <section class="ab-hero">
+    <img class="ab-hero__img" src={preview(hero)} alt={`${hero.title}, a VESPRO™ oil painting wallpaper`} width="800" height="450" fetchpriority="high" />
+    <div class="wrap ab-hero__txt">
+      <p class="eyebrow">Our story</p>
+      <h1>Your screen deserves <em class="serif">a painting</em></h1>
+    </div>
+  </section>
+
+  <!-- Manifesto -->
+  <section class="section">
+    <div class="wrap ab-read">
+      <p class="ab-drop">Think about how many hours your eyes rest on a screen. Early mornings, late nights, the long middle of the day. For most of that time it shows a stock photo you never chose, or a gradient that was already there when you unboxed it.</p>
+      <p>We wanted something closer to a painting on a wall. Thick paint, visible brushstrokes, light that seems to sit on top of the surface. Something you notice on a Monday and still love on a Friday.</p>
+      <p>So we started painting wallpapers. That is VESPRO™.</p>
+    </div>
+  </section>
+
+  <section class="wrap ab-quote">
+    <blockquote>
+      <p>“A wallpaper should feel less like a file and more like <em class="serif">a window</em>.”</p>
+    </blockquote>
+  </section>
+
+  <!-- Capítulos -->
+  <section class="section">
+    <div class="wrap ab-chapters">
+      {chapters.map((c, i) => (
+        <article class:list={['ab-ch', { 'ab-ch--flip': i % 2 === 1 }]}>
+          <figure class="ab-ch__img"><img src={preview(c.img)} alt={`${c.img.title}, oil painting wallpaper`} width="800" height="450" loading="lazy" decoding="async" /></figure>
+          <div class="ab-ch__txt">
+            <span class="ab-ch__n">{c.n}</span>
+            <h2>{c.title}</h2>
+            {c.body.map((p) => <p>{p}</p>)}
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <!-- Obras selecionadas -->
+  <section class="section ab-works">
+    <div class="wrap">
+      <div class="ab-works__head">
+        <div>
+          <p class="eyebrow">Selected works</p>
+          <h2>A few we are <em class="serif">proud of</em></h2>
+        </div>
+        <a href="/wallpapers">See every collection →</a>
+      </div>
+      <ul class="ab-works__grid">
+        {selected.map((x) => (
+          <li><a href={`/wallpaper/${x.slug}`}>
+            <img src={preview(x)} alt={`${x.title}, oil painting wallpaper`} width="800" height="450" loading="lazy" decoding="async" />
+            <span>{x.title}</span>
+          </a></li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Crenças -->
+  <section class="section ab-beliefs-wrap">
+    <div class="wrap">
+      <p class="eyebrow center">What we believe</p>
+      <ul class="ab-beliefs">
+        {beliefs.map((b) => <li><h3>{b.t}</h3><p>{b.d}</p></li>)}
+      </ul>
+    </div>
+  </section>
+
+  <!-- Origem -->
+  <section class="section">
+    <div class="wrap ab-origin">
+      <figure><img src="/img/home/foto-setup.webp" alt="A desk setup with a VESPRO™ painting as the wallpaper" width="1200" height="900" loading="lazy" decoding="async" /></figure>
+      <div>
+        <p class="eyebrow">Where we come from</p>
+        <h2>Started in Brazil, <em class="serif">made for every screen</em></h2>
+        <p>VESPRO™ started in Brazil, where our first customers set our paintings on their laptops and sent us photos of their desks. Today our wallpapers live on screens all over the world, and every new edition is still made with that same desk in mind.</p>
+        <p><a href="/contact">Say hello →</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Comunidade -->
+  <section class="section ab-cm" id="community">
+    <div class="wrap ab-cm__head">
+      <div>
+        <p class="eyebrow">The community</p>
+        <h2>The best part happens <em class="serif">after the download</em></h2>
+      </div>
+      <div class="ab-cm__txt">
+        <p>A few minutes after someone buys, the photos start arriving. A laptop on a kitchen table. A lock screen at night. A three-monitor setup with one painting stretched across all of it. A cat asleep in front of a gaming PC, ignoring the masterpiece behind it.</p>
+        <p>People tell us which painting they wake up to, which one they switch to on Fridays and what they would love to see next. We read every message, and they shape what we paint next.</p>
+      </div>
+    </div>
+    <div class="ab-cm__wall"><Community bare /></div>
+    <div class="wrap">
+      <div class="ab-join">
+        <p class="eyebrow">Join in</p>
+        <ol>
+          <li><b>Set your painting</b><span>Pick the one that fits your mood and make it your wallpaper.</span></li>
+          <li><b>Snap your screen</b><span>Desk, lock screen, a whole setup. Any angle works.</span></li>
+          <li><b>Share it with us</b><span>Tag <a href={SITE.instagram.url} target="_blank" rel="noopener">{SITE.instagram.handle}</a> on Instagram or email it to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. Our favorites join the wall above.</span></li>
+        </ol>
+        <a class="btn btn--ghost" href={SITE.instagram.url} target="_blank" rel="noopener">Follow {SITE.instagram.handle}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fechamento -->
+  <section class="section ab-end">
+    <div class="wrap center">
+      <h2>Find a painting <em class="serif">for your screen</em></h2>
+      <div class="ab-end__cta">
+        <a class="btn" href="/wallpapers">Explore the collections</a>
+        <a class="btn btn--ghost" href="/free-4k-wallpapers" data-track="ClickFreePack">Get 12 free</a>
+      </div>
+    </div>
+  </section>
+  <script is:inline src="/js/home.js" defer></script>
+</Base>
+
+<style>
+  .ab-hero { position: relative; min-height: min(78vh, 680px); display: flex; align-items: flex-end; margin-top: -76px; overflow: hidden; }
+  .ab-hero__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; }
+  .ab-hero::after { content: ''; position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(to top, var(--bg) 2%, rgba(6,10,16,.55) 45%, rgba(6,10,16,.25) 75%, rgba(6,10,16,.6)); }
+  .ab-hero__txt { padding-bottom: 40px; }
+  .ab-hero h1 { max-width: 12ch; font-size: clamp(2.8rem, 8vw, 6rem); margin: 0; }
+
+  .ab-read { max-width: 700px; }
+  .ab-read p { font-size: 1.2rem; line-height: 1.75; color: var(--soft); margin: 0 0 1.2em; }
+  .ab-drop::first-letter { float: left; font-family: var(--serif); font-size: 4.6rem; line-height: .85; padding: 6px 12px 0 0; color: var(--gold); }
+
+  .ab-quote { max-width: 900px; padding: 24px 0 8px; }
+  .ab-quote blockquote { margin: 0; padding: 36px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); text-align: center; }
+  .ab-quote p { margin: 0; font-size: clamp(1.6rem, 4vw, 2.6rem); line-height: 1.25; letter-spacing: -0.02em; color: var(--fg); }
+
+  .ab-chapters { display: grid; gap: 88px; }
+  .ab-ch { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; align-items: center; }
+  .ab-ch--flip .ab-ch__img { order: 2; }
+  .ab-ch__img { margin: 0; }
+  .ab-ch__img img { display: block; width: 100%; aspect-ratio: 4/3; object-fit: cover; border-radius: 16px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 80px -30px rgba(0,0,0,.85); }
+  .ab-ch__n { display: block; font-family: var(--serif); font-style: italic; font-size: 3.4rem; line-height: 1; color: var(--gold); margin-bottom: 14px; }
+  .ab-ch__txt h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
+  .ab-ch__txt p { color: var(--soft); line-height: 1.7; }
+
+  .ab-works__head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 28px; }
+  .ab-works__head h2 { margin: 0; }
+  .ab-works__head a { color: var(--gold); font-weight: 600; white-space: nowrap; }
+  .ab-works__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 180px; gap: 12px; }
+  .ab-works__grid li:nth-child(1) { grid-column: span 2; grid-row: span 2; }
+  .ab-works__grid li:nth-child(6) { grid-column: span 2; }
+  .ab-works__grid a { position: relative; display: block; height: 100%; border-radius: 14px; overflow: hidden; text-decoration: none;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 24px 48px -24px rgba(0,0,0,.85); }
+  .ab-works__grid img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+  .ab-works__grid a::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(4,7,12,.85), transparent 45%); opacity: 0; transition: opacity .3s; }
+  .ab-works__grid span { position: absolute; z-index: 1; left: 14px; right: 14px; bottom: 12px; font-size: .88rem; font-weight: 600; color: #fff;
+    opacity: 0; transform: translateY(6px); transition: opacity .3s, transform .3s; }
+  .ab-works__grid a:hover img { transform: scale(1.05); }
+  .ab-works__grid a:hover::after, .ab-works__grid a:hover span, .ab-works__grid a:focus-visible::after, .ab-works__grid a:focus-visible span { opacity: 1; transform: none; }
+
+  .ab-beliefs-wrap { background: linear-gradient(180deg, transparent, rgba(11,17,24,.7) 30%, rgba(11,17,24,.7) 70%, transparent); }
+  .ab-beliefs { list-style: none; margin: 24px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+    background: var(--line); border-radius: 16px; overflow: hidden; box-shadow: 0 0 0 1px var(--line); }
+  .ab-beliefs li { background: var(--bg); padding: 32px 28px; }
+  .ab-beliefs h3 { font-family: var(--serif); font-style: italic; font-size: 1.7rem; font-weight: 400; margin-bottom: .4em; }
+  .ab-beliefs p { margin: 0; color: var(--muted); line-height: 1.6; }
+
+  .ab-origin { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .ab-origin figure { margin: 0; }
+  .ab-origin img { display: block; width: 100%; border-radius: 16px; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+  .ab-origin p { color: var(--soft); line-height: 1.7; }
+  .ab-origin a { color: var(--gold); font-weight: 600; }
+
+  .ab-cm__head { display: grid; grid-template-columns: 1fr 1.1fr; gap: 56px; align-items: start; margin-bottom: 36px; }
+  .ab-cm__head h2 { margin: 0; font-size: clamp(1.9rem, 4vw, 3rem); }
+  .ab-cm__txt p { color: var(--soft); line-height: 1.75; margin: 0 0 1em; }
+  .ab-join { margin-top: 44px; padding: 32px; border-radius: 16px; background: rgba(11,17,24,.66); box-shadow: inset 0 0 0 1px var(--line); }
+  .ab-join ol { list-style: none; counter-reset: s; margin: 0 0 24px; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .ab-join li { counter-increment: s; display: grid; gap: 6px; }
+  .ab-join li::before { content: counter(s, decimal-leading-zero); font-family: var(--serif); font-style: italic; font-size: 2rem; line-height: 1; color: var(--gold); }
+  .ab-join b { font-weight: 600; color: var(--fg); }
+  .ab-join span { font-size: .92rem; color: var(--muted); line-height: 1.6; }
+  .ab-join a:not(.btn) { color: var(--soft); }
+
+  .ab-end h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
+  .ab-end__cta { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }
+  .ab-end__cta .btn { justify-content: center; white-space: nowrap; }
+
+  @media (max-width: 860px) {
+    .ab-hero { margin-top: -64px; min-height: 70vh; }
+    .ab-chapters { gap: 56px; }
+    .ab-ch, .ab-origin { grid-template-columns: 1fr; gap: 24px; }
+    .ab-ch--flip .ab-ch__img { order: 0; }
+    .ab-beliefs { grid-template-columns: 1fr; }
+    .ab-cm__head { grid-template-columns: 1fr; gap: 18px; }
+    .ab-join { padding: 24px 20px; }
+    .ab-join ol { grid-template-columns: 1fr; gap: 20px; }
+    .ab-works__head { flex-direction: column; align-items: flex-start; }
+    .ab-works__grid { grid-template-columns: 1fr 1fr; grid-auto-rows: 120px; gap: 8px; }
+    .ab-works__grid li:nth-child(6) { grid-column: span 2; }
+    .ab-read p { font-size: 1.08rem; }
+  }
+  @media (max-width: 560px) {
+    .ab-end__cta { gap: 8px; }
+    .ab-end__cta .btn { flex: 1; padding-inline: 12px; font-size: .8rem; }
+  }
+</style>

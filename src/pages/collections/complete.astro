@@ -5,9 +5,10 @@ import Base from '../../layouts/Base.astro';
 import WallGrid from '../../components/WallGrid.astro';
 import BeforeAfter from '../../components/home/BeforeAfter.astro';
 import Community from '../../components/home/Community.astro';
+import PayBadges from '../../components/PayBadges.astro';
 import { PAGES } from '../../data/pages';
 import { SITE } from '../../config';
-import { WALLPAPERS, byCollection, preview, showcase, EDITIONS_LABEL } from '../../data/wallpapers';
+import { WALLPAPERS, byCollection, preview, showcase, EDITIONS_LABEL, countLabel } from '../../data/wallpapers';
 import { PRODUCTS, formatPrice } from '../../../api/_lib/products.js';
 
 const ed = PRODUCTS.complete;
@@ -19,13 +20,23 @@ const exclusive = WALLPAPERS.filter((w) => w.collection === null);
 const inPacks = packs.reduce((s, p) => s + p.items.length, 0);
 const separate = packs.reduce((s, p) => s + p.price, 0);
 const perWallpaper = (Math.ceil(ed.price / 150) / 100).toFixed(2);   // teto do preço por obra com 150 obras
-const gallery = showcase(24);   // amostra variada: não mostrar tudo mantém a curiosidade
+const savePct = Math.floor((1 - ed.price / separate) * 100);   // economia contra comprar as coleções uma a uma (sem contar as exclusivas)
 const pick = (slugs: string[]) => slugs.map((s) => WALLPAPERS.find((w) => w.slug === s)!).filter(Boolean);
-// Mosaico do topo: uma obra em destaque no centro e 12 em volta, escolhidas pela variedade de cor e tema
-const featured = pick(['tiger-swimming-turquoise-water'])[0];
-const wall = pick(['pink-tennis-court-in-the-jungle', 'red-seaplane-over-the-ocean', 'rider-on-a-horse-of-fire', 'japanese-castle-full-moon',
-  'red-sports-car-in-santorini', 'street-race-in-paris', 'supercars-at-the-palm-mansion', 'white-tiger-on-a-green-hill',
-  'the-world-is-yours-airship', 'portofino-harbour', 'snow-angel', 'marble-statue-from-behind']);
+// Topo: uma imagem principal e, embaixo, a capa de cada coleção (com o nome), duas exclusivas e o aviso das próximas edições,
+// para mostrar o tamanho do Editions de relance
+const featured = pick(['supercars-at-the-palm-mansion'])[0];
+const COVERS: Record<string, string> = {
+  signature: 'tiger-swimming-turquoise-water', ocean: 'tall-ship-open-sea', cars: 'havana-classic-cars', sporting: 'street-race-in-paris',
+  animals: 'galloping-horses', winter: 'skiers-snowy-mountain', cities: 'couple-walking-in-the-rain', 'still-life': 'chess-reflection-water',
+  shadows: 'white-horse-and-red-ferrari-noir',
+};
+// "A first look": só 6 obras, escolhidas a dedo e diferentes das do topo (pouca coisa mantém a curiosidade)
+const firstLook = pick(['red-sports-car-in-santorini', 'japanese-castle-full-moon', 'portofino-harbour', 'red-seaplane-over-the-ocean',
+  'marble-statue-from-behind', 'the-world-is-yours-airship']);
+const tiles = [
+  ...packs.map((p) => ({ label: p.collection, w: pick([COVERS[p.key]])[0] || p.items[0], excl: false })),
+  ...pick(['lake-house-golden-hour', 'black-cat-money']).map((w) => ({ label: 'Exclusive', w, excl: true })),
+];
 
 const faq = [
   { q: 'What exactly do I get?', a: `Every VESPRO™ wallpaper in full resolution, ${EDITIONS_LABEL} and growing: all ${packs.length} collections plus exclusive paintings you won't find in any collection. The files come organised in folders by collection.` },
@@ -45,7 +56,7 @@ const productLd = {
   '@context': 'https://schema.org', '@type': 'Product',
   name: 'VESPRO Editions: The Complete Collection',
   description: `${EDITIONS_LABEL} VESPRO impasto oil painting wallpapers, every collection, plus every new edition. One-time payment, instant download.`,
-  image: [featured, ...wall.slice(0, 2)].map((w) => new URL(preview(w), SITE.url).href),
+  image: [featured, ...tiles.slice(0, 2).map((x) => x.w)].map((w) => new URL(preview(w), SITE.url).href),
   brand: { '@type': 'Brand', name: 'VESPRO' },
   sku: 'vespro-editions',
   offers: { '@type': 'Offer', price: (ed.price / 100).toFixed(2), priceCurrency: 'USD', availability: 'https://schema.org/InStock', url: canonical },
@@ -56,33 +67,36 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
 <Base page={PAGES.complete} pageType="collection" image={preview(featured)} jsonLd={[productLd, faqLd]}
   footerNote="Real customer conversations, translated from Portuguese. Some setup photos are for illustration.">
 
-  <!-- Topo -->
+  <!-- Topo: no celular a imagem vem primeiro (como página de produto); no computador, texto à esquerda e mosaico à direita -->
   <section class="ed-hero">
     <div class="wrap ed-hero__in">
+      <div class="ed-hero__art">
+        <figure class="ed-art__main">
+          <img src={preview(featured, 800)} alt={`${featured.title}, one of the VESPRO™ Editions oil painting wallpapers`} width="800" height="450" loading="eager" fetchpriority="high" decoding="async" />
+          <figcaption>{EDITIONS_LABEL} wallpapers · {packs.length} collections</figcaption>
+        </figure>
+        <ul class="ed-art__tiles" aria-label="Collections included">
+          {tiles.map((x) => (
+            <li class:list={[{ 'is-excl': x.excl }]}><img src={preview(x.w, 400)} alt="" width="400" height="225" loading="eager" decoding="async" /><span>{x.label}</span></li>
+          ))}
+          <li class="ed-art__new"><b>+</b><span>New editions, free</span></li>
+        </ul>
+      </div>
       <div class="ed-hero__txt">
         <p class="eyebrow">The Complete Collection</p>
         <h1>VESPRO™ <em class="serif">Editions</em></h1>
-        <p class="lead">Every impasto oil painting wallpaper we have ever made, in one download. Plus every new edition we release, free, for life.</p>
-        <ul class="ed-ticks">
-          <li>{EDITIONS_LABEL} oil painting wallpapers, most in 4K</li>
-          <li>All {packs.length} collections, plus exclusive paintings found only here</li>
-          <li>Every future edition included</li>
-        </ul>
+        <p class="lead">Every oil painting wallpaper we have ever made, in one download. Every new edition free, for life.</p>
         <div class="ed-price">
           <b>{price}</b>
-          <span>One-time payment<br />under ${perWallpaper} per wallpaper</span>
+          <span class="ed-price__save">Save {savePct}%</span>
         </div>
+        <p class="ed-price__note"><s>{formatPrice(separate)}</s> if you buy the {packs.length} collections separately · under ${perWallpaper} per wallpaper</p>
         <div class="ed-cta" data-ed-cta>
           <a class="btn ed-cta__buy" href={buy} data-checkout data-track="ClickBuy" data-track-value={(ed.price / 100).toFixed(2)} data-track-name={ed.name}>Get VESPRO™ Editions</a>
           <button type="button" class="btn btn--ghost" data-add-to-cart="complete">+ Cart</button>
         </div>
-        <p class="ed-trust">Instant download · Secure checkout by Stripe · 14-day money-back guarantee</p>
-      </div>
-      <div class="ed-hero__art" aria-hidden="true">
-        <div class="ed-wall">
-          <img class="ed-wall__feat" src={preview(featured, 800)} alt="" width="800" height="450" loading="eager" decoding="async" />
-          {wall.map((w) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="eager" decoding="async" />)}
-        </div>
+        <div class="ed-pay"><PayBadges /></div>
+        <p class="ed-trust">One-time payment · Instant download · 14-day money-back guarantee</p>
       </div>
     </div>
   </section>
@@ -90,7 +104,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   <!-- Números -->
   <section class="wrap ed-stats" aria-label="At a glance">
     <div><b>{EDITIONS_LABEL}</b><span>oil painting wallpapers</span></div>
-    <div><b>{packs.length + 1}</b><span>collections in one</span></div>
+    <div><b>{packs.length}</b><span>collections in one</span></div>
     <div><b>4K</b><span>most files 3840 × 2160</span></div>
     <div><b>Free</b><span>future editions</span></div>
     <div><b>Once</b><span>pay one time, keep forever</span></div>
@@ -110,7 +124,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
             <div class="ed-col__img">{p.items.slice(0, 4).map((w) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />)}</div>
             <p class="ed-col__brand">VESPRO™</p>
             <h3>{p.collection}</h3>
-            <p class="ed-col__meta">{p.edition} · {p.items.length} wallpapers{p.hd ? ' · HD' : ''}</p>
+            <p class="ed-col__meta">{p.edition} · {countLabel(p.items.length)} wallpapers{p.hd ? ' · HD' : ''}</p>
             <p class="ed-col__blurb">{p.blurb.replace(/ (4K|HD) wallpapers\.$/, '').replace(/, in 4K\.$/, '.')}</p>
           </a>
         ))}
@@ -172,10 +186,14 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
     <div class="wrap">
       <div class="center">
         <p class="eyebrow">A first look</p>
-        <h2>A taste of what's <em class="serif">inside</em></h2>
-        <p class="lead" style="margin-inline:auto">{gallery.length} of the {EDITIONS_LABEL} paintings. The rest are waiting for you inside. Previews are watermarked and downscaled; you get the clean full-resolution files.</p>
+        <h2>Six of the <em class="serif">{EDITIONS_LABEL}</em></h2>
+        <p class="lead" style="margin-inline:auto">Previews are watermarked. Your files arrive clean, in full resolution.</p>
       </div>
-      <div style="margin-top:32px"><WallGrid items={gallery} /></div>
+      <ul class="ed-look">
+        {firstLook.map((w, i) => (
+          <li><a href={`/wallpaper/${w.slug}`}><img src={preview(w, i === 0 ? 800 : 400)} alt={`${w.title}, oil painting wallpaper`} width={i === 0 ? 800 : 400} height={i === 0 ? 450 : 225} loading="lazy" decoding="async" /></a></li>
+        ))}
+      </ul>
     </div>
   </section>
 
@@ -191,7 +209,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   </section>
 
   <!-- Perguntas -->
-  <section class="section">
+  <section class="section" id="faq">
     <div class="wrap ed-faq">
       <h2 class="center">Questions about <em class="serif">VESPRO™ Editions</em></h2>
       {faq.map((f) => (<details class="ed-faq__i"><summary>{f.q}</summary><p>{f.a}</p></details>))}
@@ -235,22 +253,35 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   .ed-hero::before { content: ''; position: absolute; inset: -20% 30% auto -10%; height: 520px; z-index: 0;
     background: radial-gradient(ellipse at center, hsl(214 60% 28% / .45), transparent 65%); filter: blur(30px); }
   .ed-hero__in { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1.05fr; gap: 48px; align-items: center; }
-  .ed-hero h1 { font-size: clamp(3rem, 7vw, 5.6rem); letter-spacing: -0.03em; margin-bottom: .3em; }
-  .ed-ticks { list-style: none; padding: 0; margin: 18px 0 24px; display: grid; gap: 8px; }
-  .ed-ticks li { position: relative; padding-left: 26px; color: var(--soft); }
-  .ed-ticks li::before { content: ''; position: absolute; left: 2px; top: .45em; width: 12px; height: 7px; border-left: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: rotate(-45deg); }
-  .ed-price { display: flex; align-items: center; gap: 16px; margin-bottom: 18px; }
+  .ed-hero h1 { font-size: clamp(2.6rem, 6.4vw, 5.2rem); letter-spacing: -0.03em; margin-bottom: .25em; }
+  .ed-hero__txt { grid-column: 1; grid-row: 1; }
+  .ed-price { display: flex; align-items: center; gap: 12px; margin: 22px 0 8px; }
   .ed-price b { font-size: 2.8rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
-  .ed-price span { font-size: .84rem; color: var(--muted); line-height: 1.4; }
+  .ed-price__save { padding: 4px 10px; border-radius: 999px; font-size: .74rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #eaf6ee; background: #2c6a45; }
+  .ed-price__note { font-size: .86rem; line-height: 1.5; color: var(--muted); margin: 0 0 20px; }
+  .ed-price__note s { color: var(--soft); }
   .ed-cta { display: flex; gap: 10px; flex-wrap: wrap; }
   .ed-cta__buy { flex: 1; min-width: 220px; justify-content: center; padding-block: 17px; font-size: .92rem; }
-  .ed-trust { font-size: .8rem; color: var(--muted); margin: 14px 0 0; }
-  .ed-hero__art { perspective: 1400px; }
-  .ed-wall { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-flow: dense; gap: 8px; transform: rotateY(-14deg) rotateX(6deg) rotateZ(1deg); transform-style: preserve-3d;
-    -webkit-mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 55%, transparent 100%); mask-image: radial-gradient(ellipse 75% 75% at 50% 50%, #000 55%, transparent 100%); }
-  .ed-wall img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-radius: 8px; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 20px 40px -18px rgba(0,0,0,.8); }
-  .ed-wall__feat { grid-column: 2 / 4; grid-row: 2 / 4; height: 100%; aspect-ratio: auto !important; transform: translateZ(40px) scale(1.04);
-    box-shadow: 0 0 0 1px rgba(217,184,120,.7), 0 30px 60px -20px rgba(0,0,0,.9) !important; }
+  .ed-pay { margin-top: 14px; }
+  .ed-trust { font-size: .8rem; color: var(--muted); margin: 12px 0 0; }
+  .ed-hero__art { grid-column: 2; grid-row: 1; display: grid; gap: 8px; }
+  .ed-art__main { position: relative; margin: 0; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(217,184,120,.6), 0 40px 80px -30px rgba(0,0,0,.9); }
+  .ed-art__main img { display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover; }
+  .ed-art__main figcaption { position: absolute; left: 12px; bottom: 12px; padding: 6px 12px; border-radius: 999px; font-size: .76rem; font-weight: 700;
+    letter-spacing: .03em; color: #10151c; background: var(--gold); box-shadow: 0 6px 16px -6px rgba(0,0,0,.7); }
+  .ed-art__tiles { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .ed-art__tiles li { position: relative; aspect-ratio: 16/11; border-radius: 9px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+  .ed-art__tiles img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .ed-art__tiles li::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(4,7,12,.9), rgba(4,7,12,0) 62%); }
+  .ed-art__tiles span { position: absolute; z-index: 1; left: 7px; right: 6px; bottom: 6px; font-size: .64rem; font-weight: 700; line-height: 1.15; color: #fff; }
+  .ed-art__tiles li.is-excl { box-shadow: 0 0 0 1px rgba(217,184,120,.6); }
+  .ed-art__tiles li.is-excl span { color: var(--gold); text-transform: uppercase; letter-spacing: .08em; font-size: .58rem; }
+  .ed-art__tiles .ed-art__new { display: grid; place-content: center; justify-items: center; gap: 2px; text-align: center; padding: 6px;
+    background: rgba(217,184,120,.1); box-shadow: inset 0 0 0 1px rgba(217,184,120,.5); }
+  .ed-art__tiles .ed-art__new::after { display: none; }
+  .ed-art__new b { font-size: 1.3rem; line-height: 1; color: var(--gold); }
+  .ed-art__new span { position: static; color: var(--soft); font-weight: 600; }
 
   .ed-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1px; border-radius: 14px; overflow: hidden; background: var(--line); box-shadow: 0 0 0 1px var(--line); }
   .ed-stats div { background: rgba(11,17,24,.92); padding: 20px 14px; text-align: center; display: grid; gap: 4px; }
@@ -301,6 +332,13 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   .ed-faq__i summary::-webkit-details-marker { display: none; }
   .ed-faq__i p { margin: 0; padding: 0 22px 18px; }
 
+  .ed-look { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .ed-look li:first-child { grid-column: span 2; grid-row: span 2; }
+  .ed-look a { display: block; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 20px 40px -20px rgba(0,0,0,.8); }
+  .ed-look img { display: block; width: 100%; height: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform .5s ease; }
+  .ed-look a:hover img { transform: scale(1.04); }
+  @media (max-width: 700px) { .ed-look { grid-template-columns: 1fr 1fr; gap: 8px; } .ed-look li:first-child { grid-row: auto; } }
+
   .ed-final h2 { font-size: clamp(2.2rem, 5vw, 3.6rem); }
 
   .ed-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: rgba(6,10,16,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
@@ -311,17 +349,26 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   .ed-bar .btn { padding: 12px 26px; }
 
   @media (max-width: 900px) {
-    .ed-hero__in { grid-template-columns: 1fr; gap: 32px; }
-    .ed-hero__art { max-width: 560px; margin-inline: auto; }
-    .ed-wall { transform: rotateX(8deg); }
+    .ed-hero__in { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+    .ed-hero__art, .ed-hero__txt { grid-column: 1; }
+    .ed-hero__txt { grid-row: 2; }
+    .ed-hero__art { width: 100%; max-width: 560px; margin-inline: auto; gap: 6px; }
+    .ed-art__main img { aspect-ratio: 2/1; }
+    .ed-art__main figcaption { left: 8px; bottom: 8px; padding: 5px 10px; font-size: .7rem; }
+    .ed-art__tiles { grid-template-columns: repeat(6, 1fr); gap: 5px; }
+    .ed-art__tiles li { aspect-ratio: 1; border-radius: 7px; }
+    .ed-art__tiles li::after, .ed-art__tiles li > span { display: none; }
+    .ed-art__tiles .ed-art__new span { display: none; }
     .ed-stats { grid-template-columns: repeat(2, 1fr); }
     .ed-stats div:last-child { grid-column: 1 / -1; }
     .ed-steps { grid-template-columns: 1fr; }
   }
   @media (max-width: 560px) {
-    .ed-hero { padding-top: 28px; }
-    .ed-cta { flex-direction: column; }
-    .ed-cta .btn { width: 100%; justify-content: center; }
+    .ed-hero { padding-top: 12px; }
+    .ed-price b { font-size: 2.4rem; }
+        .ed-cta { flex-wrap: nowrap; }
+    .ed-cta__buy { min-width: 0; }
+    .ed-cta .btn { justify-content: center; padding-inline: 14px; font-size: .8rem; white-space: nowrap; }
     .ed-table__row span { padding: 12px 10px; font-size: .85rem; }
     .ed-guar { flex-direction: column; text-align: center; padding: 24px; }
   }

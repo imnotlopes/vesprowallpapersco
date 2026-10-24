@@ -3,13 +3,13 @@
 // para /api/checkout com as coleções escolhidas. Ofertas (preços calculados de novo no servidor, em quote()):
 // combo de 3+ coleções com desconto, VESPRO™ Editions a preço de carrinho e o order bump do botão "Buy".
 import { PRODUCTS, OFFERS } from '../../api/_lib/products.js';
-import { WALLPAPERS, byCollection, preview, EDITIONS_LABEL } from '../data/wallpapers';
+import { WALLPAPERS, byCollection, preview, EDITIONS_LABEL, countLabel } from '../data/wallpapers';
 const bumpThumbs = ['tiger-swimming-turquoise-water', 'pink-tennis-court-in-the-jungle', 'japanese-castle-full-moon']
   .map((s) => WALLPAPERS.find((w) => w.slug === s)).filter(Boolean).map((w) => preview(w!, 400));
 const catalog = Object.fromEntries(Object.entries(PRODUCTS).map(([k, p]) => {
   const items = p.kind === 'complete' ? WALLPAPERS : byCollection(k);
   return [k, { name: p.name, collection: p.collection, edition: p.edition, price: p.price, kind: p.kind,
-    count: p.kind === 'complete' ? EDITIONS_LABEL : items.length, thumb: preview(items[0], 400), href: p.page }];
+    count: p.kind === 'complete' ? EDITIONS_LABEL : countLabel(items.length), thumb: preview(items[0], 400), href: p.page }];
 }));
 ---
 <div class="cart" data-cart data-catalog={JSON.stringify(catalog)} data-offers={JSON.stringify(OFFERS)} hidden>

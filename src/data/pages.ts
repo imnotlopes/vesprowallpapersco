@@ -106,6 +106,22 @@ export const PAGES: Record<string, PageMeta> = {
     indexable: false,
     priority: 0,
   },
+  about: {
+    path: '/about',
+    title: 'Our Story: Why We Paint Wallpapers | VESPRO™',
+    description: 'VESPRO™ paints impasto oil painting wallpapers for the screens you look at all day. Why oil paint, how an edition comes together, and what we believe.',
+    keyword: 'vespro',
+    indexable: true,
+    priority: 0.5,
+  },
+  contact: {
+    path: '/contact',
+    title: 'Contact VESPRO™ | Support, Orders & Licensing',
+    description: 'Talk to a real person at VESPRO™ about downloads, orders, refunds or commercial licensing. We reply within one working day.',
+    keyword: '',
+    indexable: true,
+    priority: 0.4,
+  },
   license: {
     path: '/license',
     title: 'License: Personal & Commercial Use | VESPRO™',

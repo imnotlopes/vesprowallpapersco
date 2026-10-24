@@ -1,0 +1,142 @@
+---
+// Painel de compra da página de produto (coleção ou obra): categoria, título, preço com selo, benefícios
+// e as opções em cartões. Com coleção: "só esta coleção" ou "esta coleção + VESPRO™ Editions" a preço de carrinho
+// (o mesmo order bump do checkout: ?items=<coleção>,complete). Obra que só existe no Editions: um cartão só.
+// O botão principal acompanha a opção marcada; data-no-bump evita o pop-up do order bump (a oferta já está na tela).
+import { PRODUCTS, OFFERS, formatPrice } from '../../api/_lib/products.js';
+import { EDITIONS_LABEL, countLabel } from '../data/wallpapers';
+import PayBadges from './PayBadges.astro';
+interface Props { eyebrow: string; pack?: string | null; packCount?: number; back: string; sub?: string; }
+const { eyebrow, pack, packCount = 0, back, sub } = Astro.props;
+const p = pack ? PRODUCTS[pack] : null;
+const c = PRODUCTS.complete;
+const bump = Math.min(OFFERS.bumpPrice, c.price);
+const backQ = `back=${encodeURIComponent(back.replace(/^\//, ''))}`;
+const res = p?.hd ? 'HD' : '4K';
+const opts = p
+  ? [
+      { id: 'pack', price: p.price, href: `/api/checkout?product=${pack}&${backQ}`, cart: pack, name: p.name },
+      { id: 'bump', price: bump, href: `/api/checkout?items=${pack},complete&${backQ}`, cart: `${pack},complete`, name: c.name },
+    ]
+  : [{ id: 'complete', price: c.price, href: `/api/checkout?product=complete&${backQ}`, cart: 'complete', name: c.name }];
+const first = opts[0];
+const checks = p
+  ? [`${countLabel(packCount)} wallpapers in ${res}`, 'One-time payment, instant download', '14-day money-back guarantee']
+  : [`${EDITIONS_LABEL} wallpapers in 4K`, 'Every new edition included', '14-day money-back guarantee'];
+---
+<div class="pp" data-pp>
+  <p class="pp__eyebrow">{eyebrow}</p>
+  <slot name="title" />
+  <div class="pp__price">
+    <b>{formatPrice(first.price)}</b>
+    <span class="pp__badge">{p ? `3+ collections: ${Math.round(OFFERS.bundleOff * 100)}% off` : 'Lifetime updates'}</span>
+  </div>
+  {sub && <p class="pp__sub">{sub}</p>}
+  <ul class="pp__checks">
+    {checks.map((t) => <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg>{t}</li>)}
+  </ul>
+
+  <fieldset class="pp__opts">
+    <legend><span>{p ? 'Get more, pay less per wallpaper' : 'Your collection'}</span></legend>
+    {p && (
+      <label class="opt">
+        <input type="radio" name={`opt-${back}`} value="pack" checked data-href={opts[0].href} data-keys={opts[0].cart} data-price={opts[0].price} data-name={opts[0].name} />
+        <span class="opt__body">
+          <span class="opt__top"><b>{p.collection} only</b><b class="opt__amt">{formatPrice(p.price)}</b></span>
+          <span class="opt__line">{countLabel(packCount)} wallpapers, about {formatPrice(Math.round(p.price / Math.max(packCount, 1)))} each</span>
+          <button type="button" class="opt__more" data-add-to-cart={pack}>Build a bundle: 3+ collections save {Math.round(OFFERS.bundleOff * 100)}% each</button>
+        </span>
+      </label>
+    )}
+    {p ? (
+      <label class="opt opt--best">
+        <span class="opt__tag">Best value</span>
+        <input type="radio" name={`opt-${back}`} value="bump" data-href={opts[1].href} data-keys={opts[1].cart} data-price={opts[1].price} data-name={opts[1].name} />
+        <span class="opt__body">
+          <span class="opt__top"><b>{p.collection} + Editions <span class="opt__save">Save {formatPrice(c.price - bump)}</span></b>
+            <span class="opt__amts"><b class="opt__amt">{formatPrice(bump)}</b><s>{formatPrice(c.price)}</s></span></span>
+          <span class="opt__line">Every VESPRO™ wallpaper, {EDITIONS_LABEL} in total, plus every new edition</span>
+          <span class="opt__gold">Just {formatPrice(bump - p.price)} more than {p.collection} alone</span>
+        </span>
+      </label>
+    ) : (
+      <label class="opt opt--best">
+        <input type="radio" name={`opt-${back}`} value="complete" checked data-href={opts[0].href} data-keys={opts[0].cart} data-price={opts[0].price} data-name={opts[0].name} />
+        <span class="opt__body">
+          <span class="opt__top"><b>{c.name}</b><b class="opt__amt">{formatPrice(c.price)}</b></span>
+          <span class="opt__line">This painting is an Editions exclusive. Get it with every VESPRO™ wallpaper, {EDITIONS_LABEL} in total, plus every new edition.</span>
+          <a class="opt__gold" href="/collections/complete">See what's inside →</a>
+        </span>
+      </label>
+    )}
+  </fieldset>
+
+  <div class="pp__cta">
+    <a class="btn pp__buy" href={first.href} data-checkout data-no-bump data-track="ClickBuy" data-track-value={(first.price / 100).toFixed(2)} data-track-name={first.name}>
+      Buy now · <span data-pp-price>{formatPrice(first.price)}</span>
+    </a>
+    <button type="button" class="btn btn--ghost" data-add-to-cart={first.cart} data-pp-cart>Add to cart</button>
+  </div>
+  <p class="pp__fine">Secure checkout by Stripe · Personal license</p>
+  <div class="pp__pay"><PayBadges center /></div>
+  <slot />
+</div>
+
+<script is:inline>
+  document.querySelectorAll('[data-pp]').forEach(function (pp) {
+    var buy = pp.querySelector('.pp__buy'), price = pp.querySelector('[data-pp-price]'), cart = pp.querySelector('[data-pp-cart]');
+    var money = function (c) { return '$' + (c / 100).toFixed(2); };
+    pp.addEventListener('change', function (e) {
+      var r = e.target; if (r.type !== 'radio') return;
+      buy.setAttribute('href', r.getAttribute('data-href'));
+      buy.setAttribute('data-track-value', (r.getAttribute('data-price') / 100).toFixed(2));
+      buy.setAttribute('data-track-name', r.getAttribute('data-name'));
+      price.textContent = money(+r.getAttribute('data-price'));
+      cart.setAttribute('data-add-to-cart', r.getAttribute('data-keys'));
+    });
+  });
+</script>
+
+<style>
+  .pp__eyebrow { font-size: .74rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); margin: 0 0 10px; }
+  .pp :global(h1) { font-size: clamp(1.8rem, 3.4vw, 2.5rem); line-height: 1.12; margin: 0 0 14px; }
+  .pp__price { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .pp__price b { font-size: 1.6rem; font-weight: 600; }
+  .pp__badge { padding: 5px 10px; border-radius: 4px; font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+    color: #10151c; background: var(--gold); }
+  .pp__sub { color: var(--soft); margin: 16px 0 0; padding-bottom: 18px; border-bottom: 1px solid var(--line); }
+  .pp__checks { list-style: none; padding: 0; margin: 18px 0 22px; display: grid; gap: 9px; }
+  .pp__checks li { display: flex; align-items: center; gap: 10px; font-size: .8rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--soft); }
+  .pp__checks svg { flex: none; color: var(--gold); }
+
+  .pp__opts { border: 0; margin: 0; padding: 0; display: grid; gap: 14px; min-width: 0; }
+  .pp__opts legend { float: left; width: 100%; padding: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 14px; font-size: .86rem; font-weight: 600; color: var(--soft); }
+  .pp__opts legend::before, .pp__opts legend::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+  .opt { position: relative; display: flex; gap: 14px; align-items: flex-start; padding: 18px; border-radius: 12px; cursor: pointer;
+    background: rgba(11,17,24,.6); box-shadow: inset 0 0 0 1px rgba(255,255,255,.16); transition: box-shadow .2s, background .2s; }
+  .opt:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,.32); }
+  .opt:has(input:checked) { background: rgba(217,184,120,.07); box-shadow: inset 0 0 0 2px var(--gold); }
+  .opt input { flex: none; width: 18px; height: 18px; margin: 3px 0 0; accent-color: var(--gold); }
+  .opt__body { flex: 1; min-width: 0; display: grid; gap: 5px; }
+  .opt__top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .opt__top > b { font-weight: 700; color: var(--fg); text-transform: uppercase; letter-spacing: .03em; font-size: .95rem; line-height: 1.5; }
+  .opt__amt { font-size: 1.2rem; font-weight: 700; color: var(--fg); white-space: nowrap; }
+  .opt__amts { display: grid; justify-items: end; line-height: 1.15; }
+  .opt__amts s { font-size: .82rem; color: var(--muted); }
+  .opt__save { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 999px; font-size: .68rem; letter-spacing: .04em; vertical-align: 2px;
+    color: #eaf6ee; background: #2c6a45; }
+  .opt__line { font-size: .86rem; color: var(--muted); }
+  .opt__gold { font-size: .9rem; font-weight: 600; color: var(--gold); text-decoration: none; }
+  .opt__tag { position: absolute; top: -10px; right: 14px; padding: 3px 10px; border-radius: 999px; font-size: .64rem; font-weight: 800;
+    letter-spacing: .1em; text-transform: uppercase; color: #10151c; background: var(--gold); }
+  .opt__more { display: none; margin-top: 10px; padding: 11px 12px; border-radius: 8px; border: 1px dashed rgba(255,255,255,.35); background: none;
+    color: var(--fg); font: inherit; font-size: .86rem; font-weight: 600; cursor: pointer; text-align: center; }
+  .opt__more:hover { border-color: var(--gold); color: var(--gold); }
+  .opt:has(input:checked) .opt__more { display: block; }
+
+  .pp__cta { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 20px; }
+  .pp__cta .btn { justify-content: center; white-space: nowrap; }
+  .pp__fine { font-size: .78rem; color: var(--muted); margin: 12px 0 0; text-align: center; }
+  .pp__pay { margin-top: 12px; }
+  @media (max-width: 420px) { .pp__cta .btn { padding-inline: 14px; font-size: .8rem; } .opt { padding: 16px 14px; } }
+</style>

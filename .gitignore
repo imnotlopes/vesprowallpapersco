@@ -15,3 +15,8 @@ scripts/marca-dagua/
 
 # artes originais sem marca d água (nunca publicar)
 arts/
+
+# anotações locais (podem conter chaves)
+stripe.txt
+CONTEXTO.md
+klaviyo.txt
