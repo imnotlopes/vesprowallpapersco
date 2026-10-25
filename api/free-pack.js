@@ -4,13 +4,18 @@
 import { trackEvent, subscribe, validEmail, METRICS } from './_lib/klaviyo.js';
 import { itemsFor } from './_lib/links.js';
 import { FREE_PACK } from './_lib/products.js';
+import { allow, ipOf, jsonBody, MIN, DAY } from './_lib/limit.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
-  const b = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : req.body || {};
+  const b = jsonBody(req);
+  if (!b) return res.status(400).json({ ok: false, error: 'Invalid request.' });
   if (b.website) return res.status(200).json({ ok: true });          // robô preencheu o campo escondido
   const email = String(b.email || '').trim().toLowerCase();
   if (!validEmail(email)) return res.status(400).json({ ok: false, error: 'Please enter a valid email.' });
+  // até 5 pedidos a cada 10 min por IP; o mesmo e-mail recebe no máximo 2 por dia (depois responde ok sem reenviar)
+  if (!allow(`free:ip:${ipOf(req)}`, 5, 10 * MIN)) return res.status(429).json({ ok: false, error: 'Too many requests. Please wait a few minutes and try again.' });
+  if (!allow(`free:mail:${email}`, 2, DAY)) return res.status(200).json({ ok: true });
   const [item] = itemsFor([FREE_PACK.key]);
   if (!item) return res.status(503).json({ ok: false, error: 'The free pack is not available right now.' });
   const device = String(b.device || '').slice(0, 20), source = String(b.source || '').slice(0, 40);

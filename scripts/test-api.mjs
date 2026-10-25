@@ -124,3 +124,21 @@ res = mkRes(); await order({ url: '/api/order?session_id=cs_test_456' }, res);
 ok(!res.body.ok && res.body.items.length === 0, 'pedido não pago não mostra links');
 res = mkRes(); await order({ url: '/api/order?session_id=../../etc' }, res);
 ok(res.code === 400, 'id de sessão inválido é recusado');
+
+// proteção contra abuso (limites por IP e por e-mail) e corpo malformado
+const fp2 = (await import('../api/free-pack.js')).default, rl2 = (await import('../api/resend-links.js')).default;
+res = mkRes(); calls.length = 0; await fp({ method: 'POST', body: { email: 'fan@example.com' } }, res);
+ok(res.body.ok && !kEvents().length, 'pack grátis: o mesmo e-mail não recebe mais de 2 por dia (responde ok sem reenviar)');
+let last; for (let i = 0; i < 6; i++) { last = mkRes(); await fp2({ method: 'POST', headers: { 'x-forwarded-for': '9.9.9.9' }, body: { email: `p${i}@example.com` } }, last); }
+ok(last.code === 429, 'pack grátis: mais de 5 pedidos em 10 min do mesmo IP são barrados');
+res = mkRes(); await fp2({ method: 'POST', body: '{nao-e-json' }, res);
+ok(res.code === 400, 'pack grátis: corpo malformado recebe 400 (não derruba a função)');
+for (let i = 0; i < 3; i++) await rl2({ method: 'POST', headers: { 'x-forwarded-for': `7.7.7.${i}` }, body: { email: 'buyer@example.com' } }, mkRes());
+res = mkRes(); calls.length = 0; await rl2({ method: 'POST', headers: { 'x-forwarded-for': '7.7.7.9' }, body: { email: 'buyer@example.com' } }, res);
+ok(res.body.ok && !kEvents().length, 'reenvio: no máximo 3 por hora para o mesmo e-mail (mesma resposta, sem reenviar)');
+for (let i = 0; i < 6; i++) { calls.length = 0; await checkout({ url: '/api/checkout', method: 'POST', headers: { 'x-forwarded-for': '5.5.5.5' }, body: { items: 'ocean', email: `s${i}@example.com`, consent: '1' } }, mkRes()); }
+ok(!kSubs().length, 'checkout: mais de 5 inscrições por hora do mesmo IP param de inscrever');
+for (let i = 0; i < 40; i++) { last = mkRes(); await checkout({ url: '/api/checkout?product=ocean', method: 'GET', headers: { 'x-forwarded-for': '6.6.6.6' } }, last); }
+ok(last.code === 303, 'checkout: 40 sessões em 10 min do mesmo IP ainda passam');
+last = mkRes(); await checkout({ url: '/api/checkout?product=ocean', method: 'GET', headers: { 'x-forwarded-for': '6.6.6.6' } }, last);
+ok(last.code === 429, 'checkout: a 41ª sessão em 10 min do mesmo IP é barrada');

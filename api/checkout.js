@@ -9,6 +9,7 @@
 import { stripe } from './_lib/stripe.js';
 import { PRODUCTS, CURRENCY, quote, upgradePrice, orderProducts } from './_lib/products.js';
 import { trackEvent, subscribe, validEmail, METRICS } from './_lib/klaviyo.js';
+import { allow, ipOf, MIN, HOUR, DAY } from './_lib/limit.js';
 
 const SITE = process.env.SITE_URL || 'https://www.vesprowallpapers.com';
 const clean = (s, n = 60) => String(s || '').replace(/[^a-z0-9_.-]/gi, '').slice(0, n);
@@ -32,6 +33,8 @@ async function upgradeQuote(id) {
 
 export default async function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).end();
+  const ip = ipOf(req);
+  if (!allow(`checkout:ip:${ip}`, 40, 10 * MIN)) return res.status(429).send('Too many checkout attempts. Please wait a few minutes and try again.');
   const url = new URL(req.url, SITE);
   const q = params(req, url);
   let cart;
@@ -63,8 +66,10 @@ export default async function handler(req, res) {
       metadata: meta,
       payment_intent_data: { metadata: { products: meta.products, offer: meta.offer } },
     });
-    if (hasEmail && (q.consent === '1' || q.consent === 'on' || q.consent === true)) {
-      // carrinho abandonado: só para quem autorizou receber e-mails
+    // carrinho abandonado: só para quem autorizou receber e-mails, com limite (5 por hora por IP e 3 por dia por e-mail)
+    // para ninguém inscrever endereços de terceiros em massa; acima disso o checkout segue normal, só sem inscrever
+    const consent = q.consent === '1' || q.consent === 'on' || q.consent === true;
+    if (hasEmail && consent && allow(`sub:ip:${ip}`, 5, HOUR) && allow(`sub:mail:${email}`, 3, DAY)) {
       await Promise.all([
         subscribe({ email, source: 'Cart' }),
         trackEvent({ email, metric: METRICS.checkout, value: cart.total / 100, uniqueId: session.id, properties: {
