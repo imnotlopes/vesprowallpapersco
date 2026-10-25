@@ -16,8 +16,9 @@ interface Props {
   jsonLd?: Record<string, unknown>[];
   footerNote?: string;
   floaters?: boolean;         // telas flutuantes nas margens (public/js/floaters.js)
+  preload?: { srcset: string; sizes: string };   // imagem principal da página (LCP): começa a baixar antes do resto
 }
-const { page, image = SITE.ogImage, pageType = 'page', jsonLd = [], footerNote, floaters = true } = Astro.props;
+const { page, image = SITE.ogImage, pageType = 'page', jsonLd = [], footerNote, floaters = true, preload } = Astro.props;
 const floatImgs = floaters ? JSON.stringify(WALLPAPERS.map((w) => preview(w, 400))) : '';
 const canonical = new URL(page.path, SITE.url).href.replace(/\/$/, page.path === '/' ? '/' : '');
 const ogImage = new URL(image, SITE.url).href;
@@ -35,6 +36,7 @@ const ld = [
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  {preload && <link rel="preload" as="image" imagesrcset={preload.srcset} imagesizes={preload.sizes} fetchpriority="high" />}
   <script is:inline define:vars={{ pixelId: SITE.metaPixelId, clarityId: SITE.clarityId, pageType }}>
     window.VESPRO = { pixelId, clarityId, pageType };
     // Pixel do Meta e Clarity: a fila (fbq, clarity) existe desde já, então nenhum evento se perde; os scripts deles

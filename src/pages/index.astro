@@ -43,9 +43,12 @@ const colData = featured.map((c) => ({ key: c.key, name: c.collection, tag: c.ta
   format: c.res === 'HD' ? 'PNG, HD (1672 × 941)' : 'PNG, 4K (3840 × 2160)' }));
 // leque da oferta: capas de cinco coleções diferentes
 const fan = pick(['couple-walking-in-the-rain', 'tall-ship-open-sea', 'tiger-swimming-turquoise-water', 'havana-classic-cars', 'white-horse-and-red-ferrari-noir']);
+// imagem principal da home no celular: a 1ª tela da faixa do hero (mesma obra e mesmo sizes de Hero.astro)
+const heroFirst = pick(['new-york-skyline-toast'])[0];
+const heroPreload = { srcset: `${preview(heroFirst, 400)} 400w, ${preview(heroFirst, 800)} 800w`, sizes: '(max-width: 640px) 150px, 380px' };
 const picks = pick(['snow-angel', 'galloping-horses', 'shark-school-of-fish', 'lake-house-golden-hour']);
 ---
-<Base page={PAGES.home} pageType="home">
+<Base page={PAGES.home} pageType="home" preload={heroPreload}>
   <Hero />
   <WordReveal />
   <ScreenCompare>

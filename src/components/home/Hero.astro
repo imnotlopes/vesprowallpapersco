@@ -18,7 +18,7 @@ const FL = [
 <section class="hero" data-floaters-skip>
   {floats.map((w, i) => (
     <div class="hero__fl" aria-hidden="true" style={`${FL[i]};animation-delay:${-i * 1.7}s`}>
-      <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />
+      <img data-after-load={preview(w, 400)} alt="" width="400" height="225" decoding="async" />
     </div>
   ))}
   <div class="wrap hero__head">
@@ -32,7 +32,7 @@ const FL = [
           <div class="dev">
             <div class="dev__laptop">
               <div class="dev__screen"><img src={preview(w, 800)} srcset={`${preview(w, 400)} 400w, ${preview(w, 800)} 800w`} sizes="(max-width: 640px) 150px, 380px"
-                alt="" width="800" height="450" loading={copy === 0 && i < 3 ? 'eager' : 'lazy'} fetchpriority={copy === 0 && i === 0 ? 'high' : undefined} decoding="async" /></div>
+                alt="" width="800" height="450" loading={copy === 0 && i === 0 ? 'eager' : 'lazy'} fetchpriority={copy === 0 && i === 0 ? 'high' : undefined} decoding="async" /></div>
               <div class="dev__base"></div>
             </div>
             <div class="dev__phone"><img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" /></div>
@@ -51,6 +51,14 @@ const FL = [
     <p class="hero__note">Instant download · Mac, Windows, iPhone &amp; Android · one-time payment</p>
   </div>
 </section>
+
+<script is:inline>
+  // telas flutuantes do hero: decorativas, então só baixam depois que a página carregou (não disputam a banda com a imagem principal)
+  (function () {
+    var go = function () { document.querySelectorAll('img[data-after-load]').forEach(function (im) { im.src = im.getAttribute('data-after-load'); im.removeAttribute('data-after-load'); }); };
+    if (document.readyState === 'complete') go(); else window.addEventListener('load', go);
+  })();
+</script>
 
 <style>
   .hero { position: relative; overflow: hidden; padding: 64px 0 56px; }

@@ -5,6 +5,7 @@ import { defineConfig } from 'astro/config';
 export default defineConfig({
   site: 'https://www.vesprowallpapers.com',
   trailingSlash: 'never',
-  build: { format: 'file' },
+  // CSS embutido no HTML (cerca de 12 KB comprimidos): no 4G lento, cada arquivo CSS separado atrasava o primeiro desenho
+  build: { format: 'file', inlineStylesheets: 'always' },
   compressHTML: true,
 });
