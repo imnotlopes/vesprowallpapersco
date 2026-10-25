@@ -6,9 +6,9 @@ import { SOCIAL } from '../data/social';
 import PayBadges from './PayBadges.astro';
 const { note } = Astro.props as { note?: string };   // aviso específico da página (ex.: tradução das conversas na home)
 const year = new Date().getFullYear();
-// a faixa de cadastro some onde já existe formulário do pack grátis ou depois da compra
+// a faixa de cadastro some onde já existe formulário do pack grátis, depois da compra e na página de vendas do Editions
 const here = Astro.url.pathname.replace(/\.html$/, '');
-const showSignup = !['/free-4k-wallpapers', '/thank-you'].includes(here);
+const showSignup = !['/free-4k-wallpapers', '/thank-you', '/collections/complete'].includes(here);
 // fundo da faixa: arte do pack grátis (já é distribuída de graça), por isso sem marca d'água e em resolução maior
 const bg = '/img/home/signup-lake-house.webp';
 ---
@@ -48,18 +48,22 @@ const bg = '/img/home/signup-lake-house.webp';
       </ul>
     </div>
     {FOOTER.map((col) => (
-      <nav aria-label={col.title}>
-        <p class="ftr__title">{col.title}</p>
-        <ul>{col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
-      </nav>
+      <details class="ftr__col" open data-ftr-col>
+        <summary class="ftr__title">{col.title}</summary>
+        <nav aria-label={col.title}>
+          <ul>{col.links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+        </nav>
+      </details>
     ))}
-    <div>
-      <p class="ftr__title">Support</p>
-      <p class="ftr__p">Our only support e-mail is:<br /><a class="ftr__mail" href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
-      <p class="ftr__p"><a href="/contact">All the ways to reach us →</a></p>
-      <p class="ftr__p">A real person replies within one working day, Monday to Friday.</p>
-      <p class="ftr__p">Every purchase comes with a 14-day money-back guarantee. See our <a class="ftr__em" href="/refunds">refund policy</a>.</p>
-    </div>
+    <details class="ftr__col" open data-ftr-col>
+      <summary class="ftr__title">Support</summary>
+      <div>
+        <p class="ftr__p">Our only support e-mail is:<br /><a class="ftr__mail" href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+        <p class="ftr__p"><a href="/contact">All the ways to reach us →</a></p>
+        <p class="ftr__p">A real person replies within one working day, Monday to Friday.</p>
+        <p class="ftr__p">Every purchase comes with a 14-day money-back guarantee. See our <a class="ftr__em" href="/refunds">refund policy</a>.</p>
+      </div>
+    </details>
   </div>
 
   <div class="wrap ftr__bottom">
@@ -71,6 +75,18 @@ const bg = '/img/home/signup-lake-house.webp';
 </footer>
 
 <script is:inline>
+  // Colunas do rodapé: recolhidas no celular (linhas com +), sempre abertas a partir de 641px.
+  // Sem JavaScript ficam todas abertas, que é o HTML padrão.
+  (function () {
+    var cols = document.querySelectorAll('[data-ftr-col]'), mq = window.matchMedia('(max-width: 640px)');
+    function sync() { cols.forEach(function (d) { d.open = !mq.matches; }); }
+    sync();
+    if (mq.addEventListener) mq.addEventListener('change', sync);
+    cols.forEach(function (d) {   // no computador o título não fecha a coluna
+      d.querySelector('summary').addEventListener('click', function (e) { if (!mq.matches) e.preventDefault(); });
+    });
+  })();
+
   // Cadastro do rodapé: entrega o pack grátis e inscreve nas novidades (o objetivo da faixa é esse, e o aviso está ao lado)
   (function () {
     var f = document.querySelector('[data-signup]'); if (!f) return;
@@ -127,6 +143,8 @@ const bg = '/img/home/signup-lake-house.webp';
   .ftr__tagline em { font-style: italic; }
   .ftr__p { font-size: .92rem; color: var(--soft); margin: 0 0 14px; line-height: 1.6; }
   .ftr__title { font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; color: var(--fg); font-weight: 700; margin: 6px 0 18px; }
+  summary.ftr__title { display: block; list-style: none; cursor: default; }
+  summary.ftr__title::-webkit-details-marker { display: none; }
   .ftr ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; }
   .ftr nav a { display: inline-block; padding: 7px 0; color: var(--soft); text-decoration: none; font-size: .78rem; font-weight: 600;
     letter-spacing: .06em; text-transform: uppercase; }
@@ -151,7 +169,17 @@ const bg = '/img/home/signup-lake-house.webp';
     .signup { margin-top: 48px; }
     .signup__box { min-height: 0; background: linear-gradient(180deg, rgba(6, 10, 16, .55), rgba(6, 10, 16, .94) 55%), var(--signup-bg) center top / cover no-repeat; }
     .signup__txt { padding: 120px 22px 28px; }
-    .ftr__in { grid-template-columns: 1fr; gap: 28px; }
-    .ftr__bottom { flex-direction: column; align-items: flex-start; }
+    .ftr { padding-top: 48px; }
+    .ftr__in { grid-template-columns: 1fr; gap: 0; }
+    .ftr__brand { margin-bottom: 20px; }
+    .ftr__col { border-bottom: 1px solid var(--line); }
+    summary.ftr__title { display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 22px 0; cursor: pointer; }
+    summary.ftr__title::after { content: ''; width: 14px; height: 14px; flex-shrink: 0; transition: transform .2s;
+      background: linear-gradient(currentColor, currentColor) center / 100% 2px no-repeat, linear-gradient(currentColor, currentColor) center / 2px 100% no-repeat; }
+    .ftr__col[open] summary.ftr__title::after { transform: rotate(45deg); }
+    .ftr__col > nav, .ftr__col > div { padding-bottom: 18px; }
+    .ftr__bottom { flex-direction: column; align-items: center; text-align: center; margin-top: 32px; border-top: 0; padding-top: 0; }
+    .ftr__bottom .pay { justify-content: center; }
+    .ftr__legal { text-align: center; }
   }
 </style>

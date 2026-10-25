@@ -165,6 +165,8 @@ const FIRST: Omit<Wallpaper, 'collection'>[] = [
     description: 'A wooden deck with armchairs looks over a still lake toward a red-brick house and hills at golden hour.' },
   { source: '048', slug: 'snow-angel', title: 'Snow Angel', theme: 'winter', colors: ['white', 'blue'], devices: ['desktop'],
     description: 'A figure in ski gear makes a snow angel in deep, fresh powder, seen from directly above.' },
+  { source: '049', slug: 'snowboarder-among-the-peaks', title: 'Snowboarder Among the Peaks', theme: 'winter', colors: ['black', 'white'], devices: ['desktop', 'iphone'],
+    description: 'A snowboarder in a black jacket and goggles holds a board against jagged snowy peaks, painted entirely in black and white.' },
   { source: '050', slug: 'skiers-snowy-mountain', title: 'Skiers on a Snowy Mountain', theme: 'winter', colors: ['white', 'blue'], devices: ['desktop'],
     description: 'Tiny skiers carve down a vast snowy slope beneath jagged alpine peaks and a bright blue sky.' },
   { source: '051', slug: 'late-night-home-office', title: 'Late-Night Home Office', theme: 'still-life', colors: ['brown', 'gold'], devices: ['desktop'],

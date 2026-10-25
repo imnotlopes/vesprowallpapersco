@@ -1,0 +1,1 @@
+Ícones de pagamento: github.com/activemerchant/payment_icons (licença MIT, Copyright 2015 Shopify Inc).

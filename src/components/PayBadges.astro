@@ -1,22 +1,23 @@
 ---
-// Selos das formas de pagamento aceitas no checkout do Stripe (rodapé e embaixo dos botões de compra).
+// Selos das formas de pagamento aceitas no checkout do Stripe (rodapé, carrinho e embaixo dos botões de compra).
+// Logos oficiais em public/img/pay (activemerchant/payment_icons, licença MIT).
 const PAY = [
-  { name: 'Visa', svg: '<rect width="38" height="24" rx="4" fill="#fff"/><text x="19" y="16" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="10" font-weight="700" font-style="italic" fill="#1a1f71">VISA</text>' },
-  { name: 'Mastercard', svg: '<rect width="38" height="24" rx="4" fill="#fff"/><circle cx="15.5" cy="12" r="6.5" fill="#eb001b"/><circle cx="22.5" cy="12" r="6.5" fill="#f79e1b" fill-opacity=".9"/>' },
-  { name: 'American Express', svg: '<rect width="38" height="24" rx="4" fill="#1f72cd"/><text x="19" y="15.2" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="7.4" font-weight="700" fill="#fff">AMEX</text>' },
-  { name: 'Discover', svg: '<rect width="38" height="24" rx="4" fill="#fff"/><text x="19" y="14.6" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="5.6" font-weight="700" fill="#231f20">DISCOVER</text><path d="M0 19h38v1a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4z" fill="#f58220"/>' },
-  { name: 'Apple Pay', svg: '<rect width="38" height="24" rx="4" fill="#fff"/><text x="19" y="15" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="6.6" font-weight="700" fill="#000">Apple Pay</text>' },
-  { name: 'Google Pay', svg: '<rect width="38" height="24" rx="4" fill="#fff"/><text x="11" y="15.6" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="9" font-weight="700" fill="#4285f4">G</text><text x="23" y="15.4" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="8" fill="#5f6368">Pay</text>' },
+  { name: 'Visa', file: 'visa' },
+  { name: 'Mastercard', file: 'mastercard' },
+  { name: 'American Express', file: 'amex' },
+  { name: 'Discover', file: 'discover' },
+  { name: 'Apple Pay', file: 'apple-pay' },
+  { name: 'Google Pay', file: 'google-pay' },
 ];
 interface Props { center?: boolean; }
 const { center = false } = Astro.props;
 ---
 <ul class:list={['pay', { 'pay--center': center }]} aria-label="Accepted payment methods">
-  {PAY.map((p) => <li title={p.name}><svg width="38" height="24" viewBox="0 0 38 24" role="img" aria-label={p.name} set:html={p.svg} /></li>)}
+  {PAY.map((p) => <li><img src={`/img/pay/${p.file}.svg`} alt={p.name} title={p.name} width="38" height="24" loading="lazy" decoding="async" /></li>)}
 </ul>
 <style>
   .pay { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .pay--center { justify-content: center; }
   .pay li { line-height: 0; }
-  .pay svg { display: block; border-radius: 4px; box-shadow: 0 0 0 1px rgba(255, 255, 255, .12); }
+  .pay img { display: block; width: 38px; height: 24px; border-radius: 3px; }
 </style>

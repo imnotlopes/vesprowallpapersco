@@ -1,0 +1,75 @@
+---
+// A mesma pintura em quatro telas reais, cada uma no seu formato (notebook 16:10, monitor 4K 16:9, ultrawide 21:9 e celular).
+// As miniaturas embaixo trocam a obra em todas as telas ao mesmo tempo (public/js/home.js, [data-screens]).
+// Em public/img/home/screens: <obra>-desk.webp e <obra>-phone.webp. As do pack grátis vão sem marca d'água;
+// o snowboarder (Alpine Hours, obra paga) vai com a marca d'água das prévias.
+// O celular mostra a versão vertical da obra (as versões de celular vieram da landing, pasta _site-limpas/celular).
+import { WALLPAPERS } from '../../data/wallpapers';
+const works = ['snowboarder-among-the-peaks', 'havana-classic-cars', 'new-york-skyline-toast', 'snow-angel', 'superyacht-sunset']
+  .map((s) => WALLPAPERS.find((w) => w.slug === s)!).filter(Boolean)
+  .map((w) => ({ slug: w.slug, title: w.title, desk: `/img/home/screens/${w.slug}-desk.webp`, phone: `/img/home/screens/${w.slug}-phone.webp` }));
+const SCREENS = [
+  { key: 'laptop', name: 'MacBook', res: '2560 × 1600 Retina' },
+  { key: 'monitor', name: '4K monitor', res: '3840 × 2160' },
+  { key: 'wide', name: 'Ultrawide', res: '3440 × 1440, cropped' },
+  { key: 'phone', name: 'Phone', res: 'Lock screen' },
+];
+---
+<div class="scr" data-screens>
+  <ul class="scr__row">
+    {SCREENS.map((s) => (
+      <li class={`scr__dev scr__dev--${s.key}`}>
+        <div class="scr__frame">{s.key === 'phone'
+          ? <img src={works[0].phone} alt="" width="360" height="640" loading="lazy" decoding="async" data-screens-img="phone" />
+          : <img src={works[0].desk} alt="" width="800" height="450" loading="lazy" decoding="async" data-screens-img="desk" />}</div>
+        {s.key === 'laptop' && <div class="scr__base" aria-hidden="true"></div>}
+        {(s.key === 'monitor' || s.key === 'wide') && <div class="scr__stand" aria-hidden="true"></div>}
+        <p><b>{s.name}</b><span>{s.res}</span></p>
+      </li>
+    ))}
+  </ul>
+  <div class="scr__pick" role="group" aria-label="Try another painting">
+    {works.map((w, i) => (
+      <button type="button" class:list={['scr__thumb', { 'is-on': i === 0 }]} data-screens-pick={w.desk} data-screens-phone={w.phone} data-screens-slug={w.slug} data-screens-title={w.title} aria-pressed={i === 0 ? 'true' : 'false'} aria-label={`Show ${w.title}`}>
+        <img src={w.desk} alt="" width="800" height="450" loading="lazy" decoding="async" />
+      </button>
+    ))}
+  </div>
+</div>
+
+<style>
+  .scr { margin-top: 56px; }
+  .scr__row { list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-end; justify-content: center; gap: clamp(12px, 2.4vw, 32px); }
+  .scr__dev { display: flex; flex-direction: column; align-items: center; }
+  .scr__frame { background: #111418; padding: 6px; border-radius: 10px; box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 30px 50px -24px rgba(0,0,0,.8); }
+  .scr__frame img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 5px; transition: opacity .25s; }
+  .scr__frame img.is-swap { opacity: 0; }
+  .scr__dev--laptop { width: 21%; }
+  .scr__dev--laptop .scr__frame { width: 100%; aspect-ratio: 16 / 10; border-radius: 10px 10px 0 0; padding-bottom: 4px; }
+  .scr__base { width: 112%; height: 9px; background: #23262b; border-radius: 0 0 9px 9px; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+  .scr__dev--monitor { width: 28%; }
+  .scr__dev--monitor .scr__frame { width: 100%; aspect-ratio: 16 / 9; }
+  .scr__dev--wide { width: 31%; }
+  .scr__dev--wide .scr__frame { width: 100%; aspect-ratio: 21 / 9; }
+  .scr__stand { width: 22%; height: 26px; background: linear-gradient(#23262b, #17191d); clip-path: polygon(38% 0, 62% 0, 70% 80%, 100% 80%, 100% 100%, 0 100%, 0 80%, 30% 80%); }
+  .scr__dev--phone { width: 7%; min-width: 50px; }
+  .scr__dev--phone .scr__frame { width: 100%; aspect-ratio: 9 / 19.5; padding: 4px; border-radius: 16px; }
+  .scr__dev--phone .scr__frame img { border-radius: 12px; }
+  .scr__dev p { margin: 14px 0 0; text-align: center; line-height: 1.3; }
+  .scr__dev p b { display: block; font-size: .82rem; font-weight: 600; color: var(--fg); }
+  .scr__dev p span { display: block; font-size: .72rem; color: var(--muted); white-space: nowrap; }
+  .scr__pick { display: flex; justify-content: center; gap: 10px; margin-top: 28px; }
+  .scr__thumb { padding: 0; border: 0; background: none; cursor: pointer; border-radius: 8px; opacity: .55; transition: opacity .2s, box-shadow .2s;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.18); overflow: hidden; }
+  .scr__thumb img { display: block; width: 72px; aspect-ratio: 16 / 10; object-fit: cover; }
+  .scr__thumb:hover, .scr__thumb.is-on { opacity: 1; }
+  .scr__thumb.is-on { box-shadow: 0 0 0 2px var(--gold); }
+  @media (max-width: 760px) {
+    .scr__row { display: grid; grid-template-columns: 1fr 1fr; align-items: end; gap: 28px 18px; }
+    .scr__dev--laptop, .scr__dev--monitor, .scr__dev--wide { width: 100%; }
+    .scr__dev--phone { width: 36%; justify-self: center; }
+    .scr__dev p span { white-space: normal; }
+    .scr__dev--phone p { width: max-content; }
+    .scr__thumb img { width: 60px; }
+  }
+</style>

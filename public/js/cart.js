@@ -61,70 +61,77 @@
     if (window.clarity) clarity('event', name);
   }
 
+  var TRASH = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+    '<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>';
+  var LOCK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true">' +
+    '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
   function priceHTML(l) {
     return l.amount < l.full ? '<s>' + money(l.full) + '</s><em>' + money(l.amount) + '</em>' : money(l.amount);
   }
   function itemHTML(l, q) {
-    var p = CAT[l.key], sub;
-    if (l.key === 'complete') {
-      sub = COMPLETE.count + ' wallpapers · <span class="cart__price">' + priceHTML(l) + '</span>' +
-        (q.packs.length ? '<br>Cart price · replaces ' + q.packs.map(function (k) { return esc(CAT[k].collection); }).join(', ') : '');
-    } else {
-      sub = p.count + ' wallpapers · <span class="cart__price">' + priceHTML(l) + '</span>';
-    }
+    var p = CAT[l.key], upgraded = l.key === 'complete' && q.packs.length > 0;
+    // no upgrade, desfazer é pela caixinha (as coleções voltam), então o Editions não leva lixeira
+    var rm = upgraded ? '' : '<button type="button" class="cart__rm" data-remove="' + l.key + '" aria-label="Remove ' + esc(p.name) + '">' + TRASH + '</button>';
     return '<li class="cart__item"><img src="' + p.thumb + '" alt="" width="400" height="225">' +
-      '<div><b>' + esc(p.name) + '</b><small>' + sub + '</small></div>' +
-      '<button type="button" class="cart__rm" data-remove="' + l.key + '">Remove</button></li>';
+      '<div><b>' + esc(p.name) + '</b><small>' + p.count + ' wallpapers</small></div>' +
+      '<div class="cart__side"><span class="cart__price">' + priceHTML(l) + '</span>' + rm + '</div></li>';
   }
-  function addHTML(k) {
+  function cardHTML(k) {
     var p = CAT[k];
-    return '<button type="button" class="cart__add" data-add="' + k + '"><img src="' + p.thumb + '" alt="" width="400" height="225">' +
-      '<i>VESPRO™</i><b>' + esc(p.collection) + '</b><i>' + esc(p.edition) + '</i><small>+ ' + money(p.price) + '</small></button>';
+    return '<img src="' + p.thumb + '" alt="" width="400" height="225">' +
+      '<div><b>' + esc(p.collection) + '</b><small>' + p.count + ' wallpapers · ' + money(p.price) + '</small></div>' +
+      '<button type="button" class="cart__addbtn" data-add="' + k + '" aria-label="Add ' + esc(p.name) + '">Add</button>';
   }
 
+  var moreI = 0;
   function render() {
     var q = quote(cart), hasAll = cart.indexOf('complete') >= 0, n = q.packs.length;
+    $('[data-cart-n]').textContent = q.lines.length ? '(' + q.lines.length + ')' : '';
     $('[data-cart-list]').innerHTML = q.lines.map(function (l) { return itemHTML(l, q); }).join('');
     $('[data-cart-empty]').hidden = cart.length > 0;
-    var more = hasAll ? [] : PACKS.filter(function (k) { return cart.indexOf(k) < 0; }).slice(0, 3);
-    $('[data-cart-more]').innerHTML = more.map(addHTML).join('');
-    $('[data-cart-more-wrap]').hidden = !more.length;
 
-    // combo: quanto falta para o desconto (ou aviso de que já está valendo)
-    var nudge = $('[data-cart-nudge]');
-    nudge.hidden = hasAll || !n;
-    nudge.classList.toggle('is-on', q.offer === 'bundle');
-    if (!nudge.hidden) {
+    // combo: barra de progresso no topo (quanto falta para o desconto, ou aviso de que já está valendo)
+    var goal = $('[data-cart-goal]');
+    goal.hidden = hasAll || !n;
+    if (!goal.hidden) {
       var left = OFF.bundleMin - n;
-      nudge.textContent = q.offer === 'bundle'
-        ? 'Bundle unlocked: ' + pct + ' off every collection in your cart.'
-        : 'Add ' + left + ' more collection' + (left > 1 ? 's' : '') + ' and save ' + pct + ' on every one.';
+      goal.classList.toggle('is-on', left <= 0);
+      $('[data-cart-goal-text]').innerHTML = left <= 0
+        ? '<b>Bundle unlocked:</b> ' + pct + ' off every collection.'
+        : 'Add <b>' + left + ' more collection' + (left > 1 ? 's' : '') + '</b> and save ' + pct + ' on each.';
+      $('[data-cart-bar]').style.width = Math.min(100, n / OFF.bundleMin * 100) + '%';
+    }
+
+    // upgrade para o Editions a preço de carrinho: caixinha marcada = Editions no carrinho, substituindo as coleções
+    var up = $('[data-cart-up]');
+    up.hidden = !n;
+    if (!up.hidden) {
+      var gap = CART_PRICE - q.total;
+      $('[data-cart-up-box]').checked = hasAll;
+      $('[data-cart-up-sub]').textContent = hasAll
+        ? 'Replaces your collections · every new edition included'
+        : gap <= 0 ? 'Costs less than your cart · every new edition included'
+          : 'Just ' + money(gap) + ' more · every new edition included';
+      $('[data-cart-up-price]').innerHTML = '<s>' + money(COMPLETE.price) + '</s>' + money(CART_PRICE);
+    }
+
+    // carrossel com as coleções que ainda não estão no carrinho, uma por vez
+    var more = hasAll ? [] : PACKS.filter(function (k) { return cart.indexOf(k) < 0; });
+    $('[data-cart-more-wrap]').hidden = !more.length;
+    if (more.length) {
+      moreI = ((moreI % more.length) + more.length) % more.length;
+      $('[data-cart-more]').innerHTML = cardHTML(more[moreI]);
+      $('[data-cart-slide]').classList.toggle('is-one', more.length < 2);
     }
 
     $('[data-cart-foot]').hidden = !cart.length;
-    var saveRow = $('[data-cart-save]');
-    saveRow.hidden = !(q.full > q.total);
-    if (!saveRow.hidden) saveRow.innerHTML = '<span>' + (q.offer === 'bump' ? 'Cart price for ' + EDITIONS : 'Bundle discount') + '</span><b>−' + money(q.full - q.total) + '</b>';
+    $('[data-cart-rows]').innerHTML = q.full > q.total
+      ? '<div><span>Subtotal</span><span>' + money(q.full) + '</span></div>' +
+        '<div class="is-save"><span>' + (q.offer === 'bump' ? 'Cart price' : 'Bundle discount') + '</span><span>−' + money(q.full - q.total) + '</span></div>'
+      : '';
     $('[data-cart-total]').textContent = money(q.total);
-    $('[data-cart-go]').textContent = hasAll
-      ? 'Check out · ' + money(q.total)
-      : 'Check out ' + n + (n > 1 ? ' collections' : ' collection') + ' · ' + money(q.total) + ' →';
-
-    // upgrade para o Editions a preço de carrinho
-    var up = $('[data-cart-upsell]');
-    up.hidden = hasAll || !n;
-    if (!up.hidden) {
-      var gap = CART_PRICE - q.total, have = q.packs.reduce(function (s, k) { return s + CAT[k].count; }, 0);
-      $('[data-cart-bar]').style.width = Math.min(100, q.total / CART_PRICE * 100) + '%';
-      $('[data-cart-hint]').textContent = gap <= 0
-        ? 'Your collections cost more than ' + EDITIONS + ' at its cart price. Get all ' + COMPLETE.count + ' wallpapers for ' + money(CART_PRICE) + ' instead.'
-        : gap < CHEAPEST
-          ? 'For just ' + money(gap) + ' more, get ' + EDITIONS + ': all ' + COMPLETE.count + ' wallpapers instead of these ' + have + '.'
-          : 'Upgrade to ' + EDITIONS + ' for just ' + money(gap) + ' more: all ' + COMPLETE.count + ' wallpapers and every new edition.';
-      $('[data-cart-all-label]').innerHTML = 'Upgrade to all ' + COMPLETE.count + ' for <s>' + money(COMPLETE.price) + '</s>' + money(CART_PRICE) + ' →';
-      $('[data-cart-all-sub]').textContent = EDITIONS + ' · cart-only price · replaces the collections above';
-    }
-    document.querySelectorAll('[data-cart-count]').forEach(function (b) { b.textContent = cart.length; b.hidden = !cart.length; });
+    $('[data-cart-go]').innerHTML = LOCK + ' Checkout · ' + money(q.total);
+    document.querySelectorAll('[data-cart-count]').forEach(function (b) { b.textContent = q.lines.length; b.hidden = !q.lines.length; });
   }
 
   var lastFocus = null, closeT;
@@ -151,22 +158,26 @@
     var hasAll = cart.indexOf('complete') >= 0;
     if (hasAll && k !== 'complete') { note(CAT[k].name + ' is already included in ' + EDITIONS + '.'); render(); return; }
     if (cart.indexOf(k) >= 0) { render(); return; }
-    var hadPacks = cart.length > 0;
-    cart = normalize(cart.concat(k)); save(); render();
-    if (k === 'complete' && hadPacks) note(EDITIONS + ' includes every collection, so you pay the cart price: ' + money(CART_PRICE) + '.');
+    cart = normalize(cart.concat(k)); save(); render();   // com coleções junto, a caixinha de upgrade aparece marcada
     var q = quote(cart);
     track('AddToCart', 'AddToCart', { value: q.total / 100, content_ids: [k], content_name: CAT[k].name });
   }
 
   document.addEventListener('click', function (e) {
-    var el = e.target.closest && e.target.closest('[data-add-to-cart],[data-cart-open],[data-cart-close],[data-remove],[data-add],[data-cart-all]');
+    var el = e.target.closest && e.target.closest('[data-add-to-cart],[data-cart-open],[data-cart-close],[data-remove],[data-add],[data-more]');
     if (!el) return;
     if (el.hasAttribute('data-add-to-cart')) { e.preventDefault(); el.getAttribute('data-add-to-cart').split(',').forEach(add); open(); }
     else if (el.hasAttribute('data-cart-open')) { e.preventDefault(); note(''); render(); open(); }
     else if (el.hasAttribute('data-cart-close')) close();
     else if (el.hasAttribute('data-remove')) { var k = el.getAttribute('data-remove'); cart = cart.filter(function (x) { return x !== k; }); note(''); save(); render(); }
     else if (el.hasAttribute('data-add')) add(el.getAttribute('data-add'));
-    else if (el.hasAttribute('data-cart-all')) { custom('BumpAccepted', { where: 'cart', value: CART_PRICE / 100 }); add('complete'); }
+    else if (el.hasAttribute('data-more')) { moreI += +el.getAttribute('data-more'); render(); }
+  });
+  // caixinha de upgrade: marcar põe o Editions (a preço de carrinho); desmarcar tira e as coleções voltam
+  $('[data-cart-up-box]').addEventListener('change', function (e) {
+    note('');
+    if (e.target.checked) { custom('BumpAccepted', { where: 'cart', value: CART_PRICE / 100 }); add('complete'); }
+    else { cart = cart.filter(function (x) { return x !== 'complete'; }); save(); render(); }
   });
   document.addEventListener('keydown', function (e) {
     if (root.hidden) return;

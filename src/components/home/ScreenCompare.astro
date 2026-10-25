@@ -1,0 +1,132 @@
+---
+// Comparador da home: tela comum x tela com uma pintura VESPRO™, no computador ou no celular (abas).
+// Obra padrão: o snowboarder (Alpine Hours), com marca d'água; as do pack grátis vão sem. O celular usa a versão vertical da obra.
+// As miniaturas da seção de telas (Screens.astro) também trocam a obra aqui (public/img/home/compare/<obra>-desk-1280|820.webp e -phone.webp).
+// O lado esquerdo é o wallpaper padrão do Mac ou do iPhone (public/img/home/compare/default-*; originais em arts/padrao, fora do git);
+// a interface (ícones, dock, relógio) fica por cima dos dois lados, então só o wallpaper muda.
+// O arrastar é o mesmo do comparador antigo (public/js/home.js, [data-compare]); as abas também estão no home.js ([data-cmp]).
+interface Props { href?: string; label?: string; }
+const { href = '#collections', label = 'Explore the collections' } = Astro.props;
+---
+<section class="section">
+  <div class="wrap center">
+    <p class="eyebrow">On your screen</p>
+    <h2>Same screen. A different <em class="serif">world</em>.</h2>
+    <p class="lead">Drag the slider to compare the default wallpaper with a VESPRO™ painting, on your desktop or on your phone.</p>
+  </div>
+  <div class="wrap">
+    <div class="cmp" data-cmp data-mode="desktop">
+      <div class="cmp__tabs" role="tablist" aria-label="Choose a screen">
+        <button type="button" role="tab" aria-selected="true" data-cmp-mode="desktop">Desktop</button>
+        <button type="button" role="tab" aria-selected="false" data-cmp-mode="phone">Phone</button>
+      </div>
+      <div class="cmp__dev">
+        <div class="cmp__frame">
+          <div class="cmp__screen" data-compare role="slider" tabindex="0" aria-label="Compare the default wallpaper with a VESPRO painting" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+            <div class="cmp__std" aria-hidden="true">
+              <img class="cmp__img cmp__img--desk" src="/img/home/compare/default-desk-1280.webp"
+                srcset="/img/home/compare/default-desk-820.webp 820w, /img/home/compare/default-desk-1280.webp 1280w" sizes="(min-width: 900px) 820px, 92vw"
+                alt="" width="1280" height="720" loading="lazy" decoding="async" />
+              <img class="cmp__img cmp__img--phone" src="/img/home/compare/default-phone.webp" alt="" width="540" height="1170" loading="lazy" decoding="async" />
+            </div>
+            <div class="cmp__after" data-compare-clip>
+              <img class="cmp__img cmp__img--desk" src="/img/home/compare/snowboarder-among-the-peaks-desk-1280.webp" data-cmp-img="desk"
+                srcset="/img/home/compare/snowboarder-among-the-peaks-desk-820.webp 820w, /img/home/compare/snowboarder-among-the-peaks-desk-1280.webp 1280w" sizes="(min-width: 900px) 820px, 92vw"
+                alt="Snowboarder Among the Peaks, an impasto oil painting wallpaper, on a desktop screen" width="1280" height="720" loading="lazy" decoding="async" />
+              <img class="cmp__img cmp__img--phone" src="/img/home/compare/snowboarder-among-the-peaks-phone.webp" data-cmp-img="phone"
+                alt="The phone version of Snowboarder Among the Peaks on a lock screen" width="540" height="960" loading="lazy" decoding="async" />
+            </div>
+            <div class="cmp__ui cmp__ui--desk" aria-hidden="true">
+              <span class="cmp__bar"></span>
+              <span class="cmp__icons"><i></i><i></i><i></i></span>
+              <span class="cmp__dock"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            </div>
+            <div class="cmp__ui cmp__ui--phone" aria-hidden="true">
+              <span class="cmp__island"></span>
+              <span class="cmp__status"><svg class="cmp__wifi" viewBox="0 0 24 18" fill="currentColor"><path d="M12 15.5a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6z" transform="translate(0 -2)"/><path d="M5.6 9.6a9 9 0 0 1 12.8 0l-1.9 1.9a6.3 6.3 0 0 0-9 0z"/><path d="M1.5 5.5a14.8 14.8 0 0 1 21 0l-1.9 1.9a12.1 12.1 0 0 0-17.2 0z"/></svg><i class="cmp__bat">80</i></span>
+              <span class="cmp__date">Sun, Oct 25</span>
+              <span class="cmp__time" data-t="9:41">9:41</span>
+              <span class="cmp__keys"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8l-1 5H9z"/><path d="M9 8h6l-1 13h-4z"/><path d="M12 12v3"/></svg></i><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></i></span>
+              <span class="cmp__home"></span>
+            </div>
+            <span class="cmp__tag cmp__tag--l">DEFAULT</span><span class="cmp__tag cmp__tag--r">VESPRO™</span>
+            <div class="cmp__handle" data-compare-handle><span>‹ ›</span></div>
+          </div>
+        </div>
+        <div class="cmp__stand" aria-hidden="true"></div>
+      </div>
+    </div>
+    <slot />
+    <p class="center" style="margin-top:28px"><a class="btn" href={href} data-track="ClickBrowse">{label}</a></p>
+  </div>
+</section>
+
+<style>
+  .cmp { margin-top: 28px; display: grid; justify-items: center; gap: 22px; }
+  .cmp__tabs { display: inline-flex; padding: 4px; border-radius: 999px; background: rgba(255,255,255,.05); box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+  .cmp__tabs button { border: 0; background: none; color: var(--soft); cursor: pointer; padding: 9px 22px; border-radius: 999px;
+    font: 700 .74rem/1 var(--sans); letter-spacing: .12em; text-transform: uppercase; transition: background .2s, color .2s; }
+  .cmp__tabs button[aria-selected='true'] { background: var(--fg); color: #060a10; }
+  .cmp__dev { display: flex; flex-direction: column; align-items: center; width: 100%; }
+  .cmp__frame { width: min(820px, 100%); padding: 10px; border-radius: 16px; background: #111418;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.18), 0 40px 80px -30px rgba(0,0,0,.85); transition: width .35s ease, border-radius .35s ease, padding .35s ease; }
+  .cmp__stand { width: 120px; height: 46px; background: linear-gradient(#23262b, #16181c);
+    clip-path: polygon(40% 0, 60% 0, 66% 80%, 100% 80%, 100% 100%, 0 100%, 0 80%, 34% 80%); }
+  .cmp__screen { position: relative; aspect-ratio: 16 / 9; border-radius: 7px; overflow: hidden; cursor: ew-resize; touch-action: pan-y; user-select: none; }
+  .cmp__std { position: absolute; inset: 0; background: #1b1d2e; }
+  .cmp__after { position: absolute; inset: 0; clip-path: inset(0 0 0 50%); -webkit-clip-path: inset(0 0 0 50%); }
+  .cmp__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+  .cmp__ui { position: absolute; inset: 0; pointer-events: none; }
+  .cmp__bar { position: absolute; top: 0; left: 0; right: 0; height: 3.2%; background: rgba(10,14,20,.35); backdrop-filter: blur(6px); }
+  .cmp__icons { position: absolute; top: 7%; right: 2.5%; display: grid; gap: 10px; }
+  .cmp__icons i { width: clamp(16px, 3.2vw, 30px); aspect-ratio: 1.2; border-radius: 4px; background: rgba(255,255,255,.85); box-shadow: 0 2px 6px rgba(0,0,0,.3); }
+  .cmp__dock { position: absolute; bottom: 3%; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px 8px; border-radius: 12px;
+    background: rgba(255,255,255,.18); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+  .cmp__dock i { width: clamp(14px, 3vw, 30px); aspect-ratio: 1; border-radius: 26%; background: rgba(255,255,255,.75); }
+  /* tela de bloqueio no padrão do iPhone (iOS 26, conforme foto do dono): ilha, Wi-Fi e bateria, data curta, relógio de vidro, lanterna e câmera */
+  .cmp__ui--phone { container-type: inline-size; color: #fff; font-family: -apple-system, 'SF Pro Display', system-ui, var(--sans); }
+  .cmp__island { position: absolute; top: 1.6%; left: 50%; width: 31%; height: 3.6%; transform: translateX(-50%); border-radius: 999px; background: #000; }
+  .cmp__status { position: absolute; top: 2.3%; right: 7%; display: flex; align-items: center; gap: 1.8cqw; }
+  .cmp__wifi { width: 5cqw; height: 3.8cqw; }
+  .cmp__bat { display: grid; place-items: center; min-width: 7.5cqw; height: 4.2cqw; padding: 0 1cqw; border-radius: 1.4cqw; background: #34c759;
+    font: 700 3cqw/1 -apple-system, system-ui, sans-serif; font-style: normal; color: #fff; }
+  .cmp__date, .cmp__time { position: absolute; left: 0; right: 0; text-align: center; }
+  .cmp__date { top: 12.4%; font-size: 13px; font-size: 5.2cqw; font-weight: 500; color: rgba(255,255,255,.9); text-shadow: 0 1px 5px rgba(0,0,0,.3); }
+  /* relógio do iOS 26 (foto do dono): SF Pro no Apple, Inter (parecida e já carregada pelo site) nos outros; vidro branco
+     quase opaco com borda clara, brilho em cima e reflexo embaixo (camada ::after com o mesmo texto) */
+  .cmp__time { top: 16.6%; font-size: 80px; font-size: 32cqw; font-weight: 700; letter-spacing: -.01em; line-height: 1;
+    font-family: -apple-system, 'SF Pro Display', 'Inter', system-ui, var(--sans); font-variant-numeric: tabular-nums;
+    color: rgba(240,242,246,.86);   /* sem text-stroke: na fonte variável ele desenha os contornos internos (linhas dentro dos números) */
+    text-shadow: 0 0 .3cqw rgba(255,255,255,.95), 0 .3cqw .6cqw rgba(0,0,0,.22), 0 1.2cqw 3cqw rgba(0,0,0,.25); }
+  .cmp__time::after { content: attr(data-t); position: absolute; inset: 0; color: transparent; -webkit-text-stroke: 0; text-shadow: none;
+    background: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(255,255,255,.35) 30%, rgba(255,255,255,0) 50%, rgba(255,255,255,0) 72%, rgba(255,255,255,.55) 100%);
+    -webkit-background-clip: text; background-clip: text; }
+  .cmp__keys { position: absolute; bottom: 5.5%; left: 12%; right: 12%; display: flex; justify-content: space-between; }
+  .cmp__keys i { display: grid; place-items: center; width: 15cqw; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.32);
+    backdrop-filter: blur(10px) saturate(1.2); -webkit-backdrop-filter: blur(10px) saturate(1.2); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35); }
+  .cmp__keys svg { width: 46%; height: 46%; }
+  .cmp__home { position: absolute; bottom: 1.4%; left: 50%; width: 36%; height: .55%; transform: translateX(-50%); border-radius: 999px; background: rgba(255,255,255,.85); }
+  .cmp__tag { position: absolute; top: 6%; font-size: .64rem; letter-spacing: .16em; font-weight: 700; padding: 6px 9px; border-radius: 999px; background: rgba(6,10,16,.7); }
+  .cmp__tag--l { left: 3%; } .cmp__tag--r { right: 12%; color: var(--gold); }
+  .cmp__handle { position: absolute; top: 0; bottom: 0; left: 50%; width: 3px; background: #fff; transform: translateX(-50%); pointer-events: none; }
+  .cmp__handle span { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 44px; height: 44px; border-radius: 50%; background: #fff; color: #060a10;
+    display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 10px 25px rgba(0,0,0,.5); }
+  .cmp__screen:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+
+  /* um modo de cada vez */
+  .cmp[data-mode='desktop'] .cmp__img--phone, .cmp[data-mode='desktop'] .cmp__ui--phone { display: none; }
+  .cmp[data-mode='phone'] .cmp__img--desk, .cmp[data-mode='phone'] .cmp__ui--desk, .cmp[data-mode='phone'] .cmp__stand { display: none; }
+  .cmp[data-mode='phone'] .cmp__frame { width: min(290px, 78vw); padding: 9px; border-radius: 44px; }
+  .cmp[data-mode='phone'] .cmp__screen { aspect-ratio: 9 / 19.5; border-radius: 36px; }
+  .cmp[data-mode='phone'] .cmp__tag { top: 44%; }
+  .cmp[data-mode='phone'] .cmp__tag--r { right: 4%; }
+
+  @media (max-width: 640px) {
+    .cmp__frame { padding: 6px; border-radius: 12px; }
+    .cmp__stand { width: 80px; height: 30px; }
+    .cmp__icons { gap: 6px; }
+    .cmp__dock { gap: 4px; padding: 4px 5px; border-radius: 8px; }
+    .cmp__tag { font-size: .56rem; padding: 4px 7px; }
+    .cmp[data-mode='desktop'] .cmp__tag { top: 8%; }
+  }
+</style>

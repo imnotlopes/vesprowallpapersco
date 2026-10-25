@@ -82,7 +82,6 @@ main > :not(.flt) { position: relative; z-index: 1; }
   75% { transform: rotate(calc(var(--rot, 0deg) - 3deg)) translate3d(-14px, -18px, 0); }
 }
 @media (prefers-reduced-motion: reduce) { .flt__item { animation: none; } }
-@media (max-width: 767px) { .flt { display: none; } }
 
 /* Página de produto (coleções e obras): galeria + painel de compra, e sanfona de detalhes */
 .pdp { padding-top: 28px; }
@@ -102,3 +101,9 @@ main > :not(.flt) { position: relative; z-index: 1; }
   .pdp__grid { grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .pdp__grid > :first-child { position: static; }
 }
+
+/* links internos (ex.: "Explore the collections") rolam suave, exceto para quem pede menos movimento */
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+
+/* proteção das artes: sem arrastar imagens e sem o menu "Salvar imagem" do toque longo no iPhone (public/js/protect.js bloqueia o botão direito) */
+img { -webkit-user-drag: none; -webkit-touch-callout: none; }

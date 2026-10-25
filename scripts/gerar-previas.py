@@ -3,7 +3,7 @@
 # e as coleções novas em arts/ (ignorada pelo git). Só obras que aparecem no site ganham prévia.
 # Uso: python scripts/gerar-previas.py            (gera só as que ainda não existem)
 #      python scripts/gerar-previas.py --todas    (refaz todas)
-import json, os, subprocess, sys
+import json, os, subprocess, sys, time
 import numpy as np
 from PIL import Image, ImageOps
 
@@ -53,6 +53,12 @@ for key, size in SIZES.items():
         im = ImageOps.fit(im, size, Image.LANCZOS)      # recorta no centro se não for 16:9
         x = np.asarray(im, dtype=np.float32) / 255
         y = np.clip(A * x + B, 0, 1)
-        Image.fromarray((y * 255 + .5).astype(np.uint8)).save(dest, 'WEBP', quality=80 if key == '800' else 76, method=6)
+        out = Image.fromarray((y * 255 + .5).astype(np.uint8))
+        for tentativa in range(5):   # o servidor de desenvolvimento pode estar lendo o arquivo naquele instante
+            try:
+                out.save(dest, 'WEBP', quality=80 if key == '800' else 76, method=6); break
+            except OSError:
+                if tentativa == 4: raise
+                time.sleep(1)
         done += 1
 print(f'{done} prévias geradas em public/img/w ({len(items)} obras no catálogo)')

@@ -43,8 +43,8 @@ const FL = [
     <p class="lead">{EDITIONS_LABEL} impasto oil painting wallpapers, made to look stunning on your laptop, desktop and phone.<br />
       Texture, brushstrokes and color that make your screen feel brand new.</p>
     <div class="hero__cta">
-      <a class="btn" href="/wallpapers" data-track="ClickBrowse">Browse wallpapers</a>
-      <a class="btn btn--ghost" href="/free-4k-wallpapers" data-track="ClickFreePack">Get 12 free</a>
+      <a class="btn" href="#collections" data-track="ClickBrowse">Explore the collections</a>
+      <a class="btn btn--ghost" href="/free-4k-wallpapers" data-track="ClickFreePack">Get 12 free wallpapers</a>
     </div>
     <p class="hero__note">Instant download · Mac, Windows, iPhone &amp; Android · one-time payment</p>
   </div>
@@ -76,8 +76,8 @@ const FL = [
   .dev__base { height: 10px; margin: 0 -14px; background: #27272a; border-radius: 0 0 10px 10px; box-shadow: 0 0 0 1px rgba(255,255,255,.15); }
   .dev__phone { position: relative; z-index: 2; margin-left: -48px; padding: 5px; background: #18181b; border-radius: 20px; box-shadow: 0 0 0 1px rgba(255,255,255,.25), 0 20px 25px -5px rgba(0,0,0,.6); }
   .dev__phone img { width: 92px; aspect-ratio: 9/19; object-fit: cover; border-radius: 15px; display: block; }
-  .hero__fl:nth-of-type(n+3) { display: none; }
-  @media (min-width: 900px) { .hero__fl:nth-of-type(n+3) { display: block; } }
-  @media (max-width: 640px) { .hero__cta { gap: 8px; } .hero__cta .btn { flex: 1; padding-inline: 12px; font-size: .8rem; } .hero { padding-top: 48px; } .dev__screen img { width: 240px; } .dev__phone img { width: 58px; } .dev { margin-right: 36px; } .hero__fl { --w: 120px !important; opacity: .4; } }
+  .hero__fl:nth-of-type(n+5) { display: none; }   /* no celular: as duas de cima e as duas de baixo */
+  @media (min-width: 900px) { .hero__fl:nth-of-type(n+5) { display: block; } }
+  @media (max-width: 640px) { .hero__cta { flex-direction: column; gap: 10px; max-width: 340px; margin-inline: auto; } .hero__cta .btn { padding-inline: 12px; font-size: .8rem; } .hero { padding-top: 48px; } .dev__screen img { width: 240px; } .dev__phone img { width: 58px; } .dev { margin-right: 36px; } .hero__fl { --w: 120px !important; opacity: .4; } }
   @media (prefers-reduced-motion: reduce) { .hero__fl { animation: none; } }
 </style>

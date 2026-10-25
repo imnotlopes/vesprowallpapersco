@@ -5,6 +5,18 @@ O site **não manda e-mail sozinho**. Ele registra eventos no Klaviyo, e cada ev
 
 A página de obrigado também mostra os links na hora, então quem compra recebe mesmo se um fluxo falhar.
 
+## Estado atual (configurado pelo conector do Klaviyo em out/2026)
+
+- Lista **VESPRO™ Newsletter** (single opt-in): ID `RQpbLr` → `KLAVIYO_LIST_ID` na Vercel.
+- Templates (código, visual escuro da marca): 1. Free pack delivery, 2. Order delivery, 3. Download links resend,
+  4. Abandoned cart 1, 5. Abandoned cart 2 (oferta do Editions a $14.99 com `{{ event.CartURL }},complete`).
+- Fluxos, todos em **rascunho** (ativar no painel depois do teste): Free pack delivery, Order delivery,
+  Download links resend, Abandoned cart (1h → e-mail 1 → 23h → e-mail 2; sai do fluxo quem comprar).
+- Os 4 eventos foram registrados uma vez no perfil `support@vesprowallpapers.com` (backfill, sem disparar nada),
+  só para os fluxos poderem usá-los como gatilho. Inclui um `Placed Order` de $0.
+- A conta ainda não pode marcar e-mails como transacionais; os de entrega estão como e-mail comum.
+  Quando o Klaviyo liberar, marcar Order delivery e Download links resend como transactional.
+
 ## 1. Conta e chave
 
 1. Crie a conta em klaviyo.com (o plano grátis atende até 250 contatos).

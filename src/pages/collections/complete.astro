@@ -26,13 +26,10 @@ const pick = (slugs: string[]) => slugs.map((s) => WALLPAPERS.find((w) => w.slug
 // para mostrar o tamanho do Editions de relance
 const featured = pick(['supercars-at-the-palm-mansion'])[0];
 const COVERS: Record<string, string> = {
-  signature: 'tiger-swimming-turquoise-water', ocean: 'tall-ship-open-sea', cars: 'havana-classic-cars', sporting: 'street-race-in-paris',
-  animals: 'galloping-horses', winter: 'skiers-snowy-mountain', cities: 'couple-walking-in-the-rain', 'still-life': 'chess-reflection-water',
+  signature: 'portofino-harbour', ocean: 'tall-ship-open-sea', cars: 'black-sports-car-horse-ranch', sporting: 'polo-at-the-mansion',
+  animals: 'galloping-horses', winter: 'skiers-snowy-mountain', cities: 'new-york-skyline-toast', 'still-life': 'chess-reflection-water',
   shadows: 'white-horse-and-red-ferrari-noir',
 };
-// "A first look": só 6 obras, escolhidas a dedo e diferentes das do topo (pouca coisa mantém a curiosidade)
-const firstLook = pick(['red-sports-car-in-santorini', 'japanese-castle-full-moon', 'portofino-harbour', 'red-seaplane-over-the-ocean',
-  'marble-statue-from-behind', 'the-world-is-yours-airship']);
 const tiles = [
   ...packs.map((p) => ({ label: p.collection, w: pick([COVERS[p.key]])[0] || p.items[0], excl: false })),
   ...pick(['lake-house-golden-hour', 'black-cat-money']).map((w) => ({ label: 'Exclusive', w, excl: true })),
@@ -64,8 +61,7 @@ const productLd = {
 const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   mainEntity: faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
 ---
-<Base page={PAGES.complete} pageType="collection" image={preview(featured)} jsonLd={[productLd, faqLd]}
-  footerNote="Real customer conversations, translated from Portuguese. Some setup photos are for illustration.">
+<Base page={PAGES.complete} pageType="collection" image={preview(featured)} jsonLd={[productLd, faqLd]}>
 
   <!-- Topo: no celular a imagem vem primeiro (como página de produto); no computador, texto à esquerda e mosaico à direita -->
   <section class="ed-hero">
@@ -181,33 +177,6 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
 
   <Community />
 
-  <!-- Galeria completa -->
-  <section class="section">
-    <div class="wrap">
-      <div class="center">
-        <p class="eyebrow">A first look</p>
-        <h2>Six of the <em class="serif">{EDITIONS_LABEL}</em></h2>
-        <p class="lead" style="margin-inline:auto">Previews are watermarked. Your files arrive clean, in full resolution.</p>
-      </div>
-      <ul class="ed-look">
-        {firstLook.map((w, i) => (
-          <li><a href={`/wallpaper/${w.slug}`}><img src={preview(w, i === 0 ? 800 : 400)} alt={`${w.title}, oil painting wallpaper`} width={i === 0 ? 800 : 400} height={i === 0 ? 450 : 225} loading="lazy" decoding="async" /></a></li>
-        ))}
-      </ul>
-    </div>
-  </section>
-
-  <!-- Garantia -->
-  <section class="section">
-    <div class="wrap ed-guar">
-      <div class="ed-guar__seal" aria-hidden="true">14<small>DAYS</small></div>
-      <div>
-        <h2>Love them, or get your <em class="serif">money back</em></h2>
-        <p>If the wallpapers aren't what you expected, email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> within 14 days and we refund you in full. No forms, no questions.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- Perguntas -->
   <section class="section" id="faq">
     <div class="wrap ed-faq">
@@ -216,13 +185,15 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
     </div>
   </section>
 
-  <!-- Chamada final -->
+  <!-- Chamada final com a garantia -->
   <section class="section">
-    <div class="wrap center ed-final">
-      <h2>Your screen, <em class="serif">painted</em></h2>
-      <p class="lead" style="margin-inline:auto">{EDITIONS_LABEL} oil paintings today, every new edition tomorrow. One payment of {price}.</p>
-      <a class="btn" href={buy} data-checkout data-track="ClickBuy" data-track-value={(ed.price / 100).toFixed(2)} data-track-name={ed.name}>Get VESPRO™ Editions</a>
-      <p class="ed-trust">Instant download · 14-day money-back guarantee</p>
+    <div class="wrap ed-guar">
+      <div class="ed-guar__seal" aria-hidden="true">14<small>DAYS</small></div>
+      <div>
+        <h2>Love them, or get your <em class="serif">money back</em></h2>
+        <p>If the wallpapers aren't what you expected, email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> within 14 days and we refund you in full. No forms, no questions.</p>
+        <a class="btn ed-guar__btn" href={buy} data-checkout data-track="ClickBuy" data-track-value={(ed.price / 100).toFixed(2)} data-track-name={ed.name}>Get all {EDITIONS_LABEL} for {price}</a>
+      </div>
     </div>
   </section>
 
@@ -322,6 +293,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   .ed-guar__seal small { font-size: .7rem; letter-spacing: .2em; margin-top: 4px; }
   .ed-guar h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); }
   .ed-guar p { margin: 0; }
+  .ed-guar__btn { margin-top: 18px; }
 
   .ed-faq { max-width: 780px; }
   .ed-faq__i { border-radius: 14px; margin-bottom: 10px; background: rgba(11,17,24,.6); box-shadow: inset 0 0 0 1px var(--line); }
@@ -332,14 +304,7 @@ const faqLd = { '@context': 'https://schema.org', '@type': 'FAQPage',
   .ed-faq__i summary::-webkit-details-marker { display: none; }
   .ed-faq__i p { margin: 0; padding: 0 22px 18px; }
 
-  .ed-look { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .ed-look li:first-child { grid-column: span 2; grid-row: span 2; }
-  .ed-look a { display: block; height: 100%; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 20px 40px -20px rgba(0,0,0,.8); }
-  .ed-look img { display: block; width: 100%; height: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform .5s ease; }
-  .ed-look a:hover img { transform: scale(1.04); }
-  @media (max-width: 700px) { .ed-look { grid-template-columns: 1fr 1fr; gap: 8px; } .ed-look li:first-child { grid-row: auto; } }
 
-  .ed-final h2 { font-size: clamp(2.2rem, 5vw, 3.6rem); }
 
   .ed-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: rgba(6,10,16,.94); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
   .ed-bar[hidden] { display: none; }

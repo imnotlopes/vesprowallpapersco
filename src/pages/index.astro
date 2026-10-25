@@ -1,145 +1,222 @@
 ---
-// Home no desenho da landing VESPRO: hero, frase, antes/depois, favoritas, temas, comunidade, pack grátis e FAQ.
-// A grade de obras e os temas ficam por SEO (links internos para as páginas que queremos ranquear).
+// Home: hero, frase, telas reais (comparador + resoluções), coleções em destaque, oferta do VESPRO™ Editions,
+// favoritas, comunidade e FAQ. As coleções e as favoritas também servem de links internos para SEO.
 import Base from '../layouts/Base.astro';
-import WallGrid from '../components/WallGrid.astro';
 import Hero from '../components/home/Hero.astro';
 import WordReveal from '../components/home/WordReveal.astro';
-import BeforeAfter from '../components/home/BeforeAfter.astro';
+import ScreenCompare from '../components/home/ScreenCompare.astro';
+import Screens from '../components/home/Screens.astro';
 import Community from '../components/home/Community.astro';
 import HomeFaq from '../components/home/HomeFaq.astro';
 import { PAGES } from '../data/pages';
-import { WALLPAPERS, THEMES, byTheme, themeIndexable, preview } from '../data/wallpapers';
+import { WALLPAPERS, byCollection, preview, EDITIONS_LABEL, countLabel } from '../data/wallpapers';
 import { PRODUCTS, formatPrice } from '../../api/_lib/products.js';
-const themes = Object.values(THEMES).filter((t) => themeIndexable(t.key));
-// nome no cartão do carrossel (plural onde o nome do tema é adjetivo: "Animal wallpapers" vira "Animals")
-const moodName = (t: { key: string; name: string }) => ({ animals: 'Animals', cars: 'Cars', cities: 'Cities' } as Record<string, string>)[t.key] || t.name;
-const picks = ['tall-ship-open-sea', 'snow-angel', 'galloping-horses', 'shark-school-of-fish', 'lake-house-golden-hour', 'couple-under-street-lamp']
-  .map((s) => WALLPAPERS.find((w) => w.slug === s)!).filter(Boolean);
+const pick = (slugs: string[]) => slugs.map((s) => WALLPAPERS.find((w) => w.slug === s)!).filter(Boolean);
+const ed = PRODUCTS.complete;
+const packs = Object.entries(PRODUCTS).filter(([, p]) => p.kind === 'pack');
+const separate = packs.reduce((s, [, p]) => s + p.price, 0);
+const savePct = Math.floor((1 - ed.price / separate) * 100);
+// Coleções em destaque: cada uma com cor, rótulo e motivo próprios (as outras ficam em /wallpapers)
+const IDENTITY: { key: string; cover: string; tag: string; accent: string; why: string }[] = [
+  { key: 'signature', cover: 'portofino-harbour', tag: 'Quiet luxury', accent: '#d9b878',
+    why: 'Riviera tennis, tigers, supercars and samurai. Our widest collection, for the screen you look at all day.' },
+  { key: 'shadows', cover: 'white-horse-and-red-ferrari-noir', tag: 'Black & white', accent: '#e8e8e8',
+    why: 'Our paintings reworked in black and white. Made for dark mode and minimal desks.' },
+  { key: 'ocean', cover: 'tall-ship-open-sea', tag: 'Open water', accent: '#56b8b2',
+    why: 'Giant waves and tall ships in thick impasto, for a desk that needs a horizon.' },
+  { key: 'cities', cover: 'new-york-skyline-toast', tag: 'City nights', accent: '#e3a857',
+    why: 'Skyline toasts, rainy avenues and old-world streets that glow softly behind your windows and tabs.' },
+  { key: 'cars', cover: 'black-sports-car-horse-ranch', tag: 'Speed & chrome', accent: '#e0644e',
+    why: 'Sports cars and classics, painted with the motion still in the brushstrokes.' },
+  { key: 'sporting', cover: 'polo-at-the-mansion', tag: 'Weekend sport', accent: '#7cc095',
+    why: 'Sailing, skiing, golf, polo and fighter jets, for the weekend you would rather be having.' },
+  { key: 'winter', cover: 'skiers-snowy-mountain', tag: 'Mountain light', accent: '#a3cdec',
+    why: 'Snow, powder and cold blue light. Calm on the eyes through long working hours.' },
+];
+const featured = IDENTITY.map((c) => {
+  const p = PRODUCTS[c.key as keyof typeof PRODUCTS];
+  return { ...c, cover: pick([c.cover])[0] || byCollection(c.key)[0], collection: p.collection, page: p.page, price: p.price,
+    count: countLabel(byCollection(c.key).length), res: (p as { hd?: boolean }).hd ? 'HD' : '4K' };
+});
+const colData = featured.map((c) => ({ key: c.key, name: c.collection, tag: c.tag, accent: c.accent, why: c.why, page: c.page,
+  price: formatPrice(c.price), files: `${c.count} oil painting wallpapers`,
+  format: c.res === 'HD' ? 'PNG, HD (1672 × 941)' : 'PNG, 4K (3840 × 2160)' }));
+// leque da oferta: capas de cinco coleções diferentes
+const fan = pick(['couple-walking-in-the-rain', 'tall-ship-open-sea', 'tiger-swimming-turquoise-water', 'havana-classic-cars', 'white-horse-and-red-ferrari-noir']);
+const picks = pick(['snow-angel', 'galloping-horses', 'shark-school-of-fish', 'lake-house-golden-hour']);
 ---
-<Base page={PAGES.home} pageType="home" footerNote="Real customer conversations, translated from Portuguese. Some setup photos are for illustration.">
+<Base page={PAGES.home} pageType="home">
   <Hero />
   <WordReveal />
-  <BeforeAfter />
+  <ScreenCompare>
+    <Screens />
+  </ScreenCompare>
 
-  <section class="section">
+  <section class="section" id="collections">
     <div class="wrap">
-      <p class="eyebrow">A few of our favorites</p>
-      <h2>Fresh off the <em class="serif">easel</em></h2>
-      <WallGrid items={picks} />
-      <p style="margin-top:20px"><a href="/wallpapers">Browse the wallpapers →</a></p>
+      <div class="center">
+        <p class="eyebrow">The collections</p>
+        <h2>Pick your <em class="serif">world</em></h2>
+        <p class="lead" style="margin-inline:auto">{featured.length} collections, each with its own palette, its own subjects and its own reason to be on your screen.</p>
+      </div>
+      <div class="offer colx" data-colx data-colx-items={JSON.stringify(colData)} style={`--ac:${featured[0].accent}`}>
+        <div class="colx__art">
+          <div class="colx__fan" data-colx-fan>
+            {featured.map((c, i) => {
+              const d = ((i + featured.length + Math.floor(featured.length / 2)) % featured.length) - Math.floor(featured.length / 2);
+              return (
+                <a class="colx__card" href={c.page} data-colx-card={i} style={`--d:${d};--a:${Math.abs(d)}`} aria-label={`VESPRO™ ${c.collection}: ${c.tag}`} aria-current={i === 0 ? 'true' : undefined}>
+                  <img src={preview(c.cover, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" />
+                  <span>{c.collection}</span>
+                </a>
+              );
+            })}
+          </div>
+          <div class="colx__nav">
+            <button type="button" data-colx-step="-1" aria-label="Previous collection">&#8592;</button>
+            <span data-colx-count>1 / {featured.length}</span>
+            <button type="button" data-colx-step="1" aria-label="Next collection">&#8594;</button>
+          </div>
+        </div>
+        <div class="offer__txt colx__txt" aria-live="polite">
+          <p class="colx__tag" data-colx-f="tag">{featured[0].tag}</p>
+          <h2>VESPRO™ <em class="serif" data-colx-f="name">{featured[0].collection}</em></h2>
+          <p class="offer__lead" data-colx-f="why">{featured[0].why}</p>
+          <p class="offer__price"><b data-colx-f="price">{formatPrice(featured[0].price)}</b><span class="colx__inc">Also included in VESPRO™ Editions</span></p>
+          <dl class="offer__specs">
+            <div><dt>Files</dt><dd data-colx-f="files">{colData[0].files}</dd></div>
+            <div><dt>Format</dt><dd data-colx-f="format">{colData[0].format}</dd></div>
+            <div><dt>Devices</dt><dd>Mac, Windows, 4K and 1440p monitors, phone lock screen</dd></div>
+            <div><dt>Access</dt><dd>Instant download, links by email, yours forever</dd></div>
+          </dl>
+          <div class="colx__cta">
+            <a class="btn" href={featured[0].page} data-colx-f="link" data-track="ClickCollection">Explore {featured[0].collection}</a>
+            <button type="button" class="btn btn--ghost" data-add-to-cart={featured[0].key} data-colx-f="cart">+ Cart</button>
+          </div>
+        </div>
+      </div>
+      <p class="center" style="margin-top:24px"><a href="/wallpapers">See all {packs.length} collections →</a></p>
     </div>
   </section>
 
   <section class="section">
     <div class="wrap">
-      <p class="eyebrow">Shop by theme</p>
-      <h2>Pick a <em class="serif">mood</em></h2>
-      <div class="rail" data-rail>
-        <div class="rail__head">
-          <div class="rail__nav">
-            <button type="button" class="rail__btn" data-rail-prev aria-label="Previous themes">&#8592;</button>
-            <button type="button" class="rail__btn" data-rail-next aria-label="Next themes">&#8594;</button>
-          </div>
+      <div class="offer">
+        <div class="offer__art" aria-hidden="true">
+          {fan.map((w, i) => <img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" style={`--i:${i - (fan.length - 1) / 2}`} />)}
         </div>
-        <ul class="rail__track" data-rail-track>
-          {themes.map((t) => (
-            <li>
-              <a class="mood" href={`/wallpapers/${t.key}`}>
-                <img src={preview(byTheme(t.key)[0], 800)} alt="" loading="lazy" width="800" height="450" />
-                <span class="mood__name">{moodName(t)}</span>
-                <span class="mood__cta">Explore</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-        <div class="rail__bar" aria-hidden="true"><span data-rail-bar></span></div>
+        <div class="offer__txt">
+          <p class="eyebrow">The complete collection</p>
+          <h2>VESPRO™ <em class="serif">Editions</em></h2>
+          <p class="offer__lead">Every collection and every exclusive painting in one download. Every new edition free, for life.</p>
+          <p class="offer__price"><b>{formatPrice(ed.price)}</b><s>{formatPrice(separate)}</s><span>Save {savePct}%</span></p>
+          <dl class="offer__specs">
+            <div><dt>Files</dt><dd>{EDITIONS_LABEL} oil painting wallpapers, {packs.length} collections plus exclusives</dd></div>
+            <div><dt>Format</dt><dd>PNG, 4K (3840 × 2160). Sporting in HD</dd></div>
+            <div><dt>Devices</dt><dd>Mac, Windows, 4K and 1440p monitors, phone lock screen</dd></div>
+            <div><dt>Access</dt><dd>Instant download, links by email, yours forever</dd></div>
+            <div><dt>Updates</dt><dd>Every new edition included, free</dd></div>
+          </dl>
+          <a class="btn" href="/collections/complete" data-track="ClickEditions">See VESPRO™ Editions</a>
+          <p class="offer__trust">One-time payment · 14-day money-back guarantee</p>
+        </div>
       </div>
-      <p style="margin-top:24px"><a class="btn btn--ghost" href="/collections/complete">Get VESPRO™ Editions, every wallpaper for {formatPrice(PRODUCTS.complete.price)}</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="fresh__head">
+        <h2>Fresh off the <em class="serif">easel</em></h2>
+        <a href="/wallpapers">Browse all →</a>
+      </div>
+      <ul class="fresh">
+        {picks.map((w) => (
+          <li><a href={`/wallpaper/${w.slug}`}><img src={preview(w, 400)} alt={`${w.title}, oil painting wallpaper`} width="400" height="225" loading="lazy" decoding="async" /><span>{w.title}</span></a></li>
+        ))}
+      </ul>
     </div>
   </section>
 
   <Community />
 
-  <section class="section">
-    <div class="wrap center">
-      <p class="eyebrow">VESPRO™ First Strokes</p>
-      <h2>Start with <em class="serif">12 free</em> wallpapers</h2>
-      <p class="lead">Full-resolution oil painting wallpapers for your desktop, delivered to your inbox.</p>
-      <a class="btn" href="/free-4k-wallpapers" data-track="ClickFreePack">Get the free pack</a>
-    </div>
-  </section>
 
   <HomeFaq />
-  <script is:inline>
-    document.querySelectorAll('[data-rail]').forEach(function (rail) {
-      var track = rail.querySelector('[data-rail-track]'), prev = rail.querySelector('[data-rail-prev]'), next = rail.querySelector('[data-rail-next]');
-      var bar = rail.querySelector('[data-rail-bar]');
-      var step = function () { return Math.max(track.clientWidth * 0.8, 200); };
-      var sync = function () {
-        var max = track.scrollWidth - track.clientWidth;
-        prev.disabled = track.scrollLeft < 4; next.disabled = track.scrollLeft > max - 4;
-        var w = Math.min(1, track.clientWidth / track.scrollWidth);
-        bar.style.width = (w * 100) + '%';
-        bar.style.transform = 'translateX(' + (max > 0 ? (track.scrollLeft / max) * (1 / w - 1) * 100 : 0) + '%)';
-      };
-      prev.addEventListener('click', function () { track.scrollBy({ left: -step(), behavior: 'smooth' }); });
-      next.addEventListener('click', function () { track.scrollBy({ left: step(), behavior: 'smooth' }); });
-      track.addEventListener('scroll', sync, { passive: true }); window.addEventListener('resize', sync); sync();
-      // arrastar com o mouse (no toque o navegador já desliza sozinho)
-      var down = false, moved = false, x0 = 0, s0 = 0;
-      track.addEventListener('pointerdown', function (e) {
-        if (e.pointerType !== 'mouse' || e.button) return;
-        down = true; moved = false; x0 = e.clientX; s0 = track.scrollLeft;
-      });
-      window.addEventListener('pointermove', function (e) {
-        if (!down) return;
-        var dx = e.clientX - x0;
-        if (!moved && Math.abs(dx) > 5) { moved = true; track.classList.add('is-drag'); }
-        if (moved) track.scrollLeft = s0 - dx;
-      });
-      window.addEventListener('pointerup', function () {
-        if (!down) return; down = false;
-        if (moved) {
-          var li = track.children[0], w = li ? li.getBoundingClientRect().width + 14 : step();
-          var to = Math.round(track.scrollLeft / w) * w;
-          track.classList.remove('is-drag');
-          track.scrollTo({ left: to, behavior: 'smooth' });
-        }
-      });
-      track.addEventListener('click', function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; } }, true);
-      track.addEventListener('dragstart', function (e) { e.preventDefault(); });
-    });
-  </script>
   <script is:inline src="/js/home.js" defer></script>
 </Base>
 
 <style>
-  .rail { position: relative; margin-top: 8px; }
-  .rail__head { display: flex; justify-content: flex-end; margin: -52px 0 16px; min-height: 40px; }
-  .rail__nav { display: flex; gap: 8px; }
-  .rail__btn { width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; font-size: 1.05rem; color: var(--soft);
-    background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); transition: color .2s, box-shadow .2s, opacity .2s; }
-  .rail__btn:hover { color: var(--gold); box-shadow: inset 0 0 0 1px rgba(217,184,120,.6); }
-  .rail__btn:disabled { opacity: .3; cursor: default; }
-  .rail__track { list-style: none; margin: 0; padding: 0 0 6px; display: grid; grid-auto-flow: column; grid-auto-columns: clamp(170px, 22vw, 250px); gap: 14px;
-    overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
-  .rail__track::-webkit-scrollbar { display: none; }
-  .rail__track li { scroll-snap-align: start; }
-  .rail__track.is-drag { scroll-snap-type: none; cursor: grabbing; }
-  .rail__track.is-drag a { pointer-events: none; }
-  .rail__bar { position: relative; height: 3px; margin-top: 14px; border-radius: 3px; background: rgba(255,255,255,.1); overflow: hidden; }
-  .rail__bar span { position: absolute; inset: 0 auto 0 0; width: 30%; border-radius: 3px; background: var(--gold); transition: transform .15s linear; }
-  .mood { position: relative; display: block; aspect-ratio: 4/5; border-radius: 14px; overflow: hidden; text-decoration: none;
-    box-shadow: 0 0 0 1px rgba(255,255,255,.12); isolation: isolate; }
-  .mood img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; z-index: -2; }
-  .mood::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(to top, rgba(4,7,12,.92) 0%, rgba(4,7,12,.35) 42%, rgba(4,7,12,0) 70%); }
-  .mood__name { position: absolute; left: 16px; right: 16px; bottom: 40px; font-family: var(--serif, Georgia, serif); font-size: 1.35rem; line-height: 1.15; color: #fff; }
-  .mood__cta { position: absolute; left: 16px; bottom: 16px; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
-  .mood:hover img { transform: scale(1.06); }
-  .mood:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
-  @media (max-width: 640px) {
-    .rail__btn { width: 36px; height: 36px; }
-    .rail__track { grid-auto-columns: 62%; margin: 0 -16px; padding: 0 16px 6px; scroll-padding-left: 16px; }
+  #collections { scroll-margin-top: 80px; }
+  /* coleções: leque de cartões + ficha no mesmo formato da oferta do Editions; a cor do bloco é a da coleção escolhida */
+  .colx { margin-top: 36px; overflow: hidden; background: radial-gradient(ellipse at 25% 45%, color-mix(in srgb, var(--ac) 16%, transparent), transparent 62%), #0b1118;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ac) 50%, transparent); transition: box-shadow .4s; }
+  .colx__art { display: grid; gap: 14px; }
+  .colx__fan { position: relative; height: 360px; touch-action: pan-y; }
+  .colx__card { position: absolute; left: 50%; top: 50%; width: 42%; aspect-ratio: 3/4; border-radius: 14px; overflow: hidden; text-decoration: none;
+    z-index: calc(10 - var(--a)); opacity: calc(1 - var(--a) * .16); filter: brightness(calc(1 - var(--a) * .14));
+    box-shadow: 0 0 0 1px rgba(255,255,255,.16), 0 30px 50px -20px rgba(0,0,0,.85);
+    transform: translate(-50%, -50%) translateX(calc(var(--d) * 30%)) translateY(calc(var(--a) * var(--a) * 2.5%)) rotate(calc(var(--d) * 7deg)) scale(calc(1 - var(--a) * .07));
+    transition: transform .55s cubic-bezier(.2,.7,.2,1), opacity .4s, filter .4s, box-shadow .3s; }
+  .colx__card img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .colx__card span { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 12px 12px; font-family: var(--serif); font-size: 1.15rem; color: #fff;
+    background: linear-gradient(to top, rgba(4,7,12,.9), transparent); }
+  .colx__card[aria-current] { box-shadow: 0 0 0 2px var(--ac), 0 34px 60px -20px rgba(0,0,0,.9); }
+  .colx__card:not([aria-current]) span { opacity: 0; }
+  .colx__card:focus-visible { outline: 2px solid var(--ac); outline-offset: 3px; }
+  .colx__nav { display: flex; align-items: center; justify-content: center; gap: 16px; font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .colx__nav button { width: 40px; height: 40px; border-radius: 50%; border: 0; cursor: pointer; font-size: 1rem; color: var(--soft);
+    background: rgba(255,255,255,.04); box-shadow: inset 0 0 0 1px rgba(255,255,255,.18); }
+  .colx__nav button:hover { color: var(--ac); box-shadow: inset 0 0 0 1px var(--ac); }
+  .colx__tag { display: inline-block; margin: 0 0 12px; padding: 6px 11px; border-radius: 999px; font-size: .68rem; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--ac); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ac) 55%, transparent); }
+  .offer__price .colx__inc { padding: 0; box-shadow: none; text-transform: none; letter-spacing: 0; font-weight: 400; font-size: .8rem; color: var(--muted); }
+  .colx__cta { display: flex; gap: 10px; flex-wrap: wrap; }
+  .colx__txt [data-colx-f] { transition: opacity .2s; }
+  .colx__txt.is-swap [data-colx-f] { opacity: 0; }
+  @media (max-width: 860px) {
+    .colx__fan { height: 270px; }
+    .colx__card { width: 44%; }
+    .colx__card span { font-size: 1rem; }
+    .colx__cta .btn { flex: 1; justify-content: center; }
+  }
+  @media (prefers-reduced-motion: reduce) { .colx__card { transition: none; } }
+
+  /* oferta principal */
+  .offer { display: grid; grid-template-columns: 1fr 1.05fr; gap: 48px; align-items: center; padding: 48px; border-radius: 22px;
+    background: radial-gradient(ellipse at 20% 40%, rgba(217,184,120,.12), transparent 60%), #0b1118; box-shadow: inset 0 0 0 1px rgba(217,184,120,.4); }
+  .offer__art { position: relative; height: 320px; }
+  .offer__art img { position: absolute; left: 50%; top: 50%; width: 46%; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px;
+    box-shadow: 0 0 0 1px rgba(255,255,255,.16), 0 30px 50px -20px rgba(0,0,0,.85);
+    transform: translate(calc(-50% + var(--i) * 28%), calc(-50% + var(--i) * var(--i) * 4%)) rotate(calc(var(--i) * 8deg)); }
+  .offer__txt h2 { margin-bottom: 10px; }
+  .offer__lead { color: var(--soft); margin: 0 0 18px; }
+  .offer__price { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 18px; }
+  .offer__price b { font-size: 2.4rem; line-height: 1; }
+  .offer__price s { color: var(--muted); }
+  .offer__price span { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #6fd6a3; padding: 5px 9px; border-radius: 999px;
+    box-shadow: inset 0 0 0 1px rgba(111,214,163,.5); }
+  .offer__specs { margin: 0 0 24px; display: grid; gap: 0; }
+  .offer__specs div { display: grid; grid-template-columns: 90px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); font-size: .88rem; }
+  .offer__specs dt { color: var(--muted); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding-top: 2px; }
+  .offer__specs dd { margin: 0; color: var(--fg); }
+  .offer__trust { margin: 12px 0 0; font-size: .8rem; color: var(--muted); }
+
+  /* favoritas: uma linha só */
+  .fresh__head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 18px; }
+  .fresh__head h2 { margin: 0; }
+  .fresh__head a { white-space: nowrap; font-size: .9rem; }
+  .fresh { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .fresh a { position: relative; display: block; border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px rgba(255,255,255,.12); }
+  .fresh img { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; transition: transform .5s ease; }
+  .fresh span { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 12px 10px; font-size: .78rem; color: #fff;
+    background: linear-gradient(to top, rgba(4,7,12,.85), transparent); opacity: 0; transition: opacity .25s; }
+  .fresh a:hover img { transform: scale(1.05); }
+  .fresh a:hover span, .fresh a:focus-visible span { opacity: 1; }
+
+  @media (max-width: 860px) {
+    .offer { grid-template-columns: 1fr; gap: 20px; padding: 28px 20px; }
+    .offer__art { height: 230px; }
+    .offer__art img { width: 40%; }
+    .fresh { grid-template-columns: 1fr 1fr; gap: 8px; }
   }
 </style>
