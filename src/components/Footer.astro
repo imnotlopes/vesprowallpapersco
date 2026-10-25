@@ -9,13 +9,15 @@ const year = new Date().getFullYear();
 // a faixa de cadastro some onde já existe formulário do pack grátis, depois da compra e na página de vendas do Editions
 const here = Astro.url.pathname.replace(/\.html$/, '');
 const showSignup = !['/free-4k-wallpapers', '/thank-you', '/collections/complete'].includes(here);
-// fundo da faixa: arte do pack grátis (já é distribuída de graça), por isso sem marca d'água e em resolução maior
-const bg = '/img/home/signup-lake-house.webp';
+// fundo da faixa: arte do pack grátis (já é distribuída de graça), por isso sem marca d'água. É uma <img loading="lazy">
+// (não fundo de CSS, que o navegador baixa logo no início e atrasava a imagem principal no celular), em duas larguras.
+const bg = { src: '/img/home/signup-lake-house-1200.webp', srcset: '/img/home/signup-lake-house-700.webp 700w, /img/home/signup-lake-house-1200.webp 1200w' };
 ---
 {showSignup && (
   <section class="signup" aria-labelledby="signup-title">
     <div class="wrap">
-      <div class="signup__box" style={`--signup-bg:url(${bg})`}>
+      <div class="signup__box">
+        <img class="signup__bg" src={bg.src} srcset={bg.srcset} sizes="(max-width: 640px) 100vw, 1120px" alt="" width="1200" height="675" loading="lazy" decoding="async" />
         <div class="signup__txt">
           <h2 id="signup-title">Stay close to the <em class="serif">easel</em></h2>
           <p>Join our list and get 12 free 4K wallpapers right away, plus first looks at every new VESPRO™ edition.</p>
@@ -117,9 +119,11 @@ const bg = '/img/home/signup-lake-house.webp';
   /* faixa de cadastro */
   .signup { margin-top: 72px; }
   .signup__box { position: relative; overflow: hidden; border-radius: 18px; min-height: 340px; display: flex; align-items: center;
-    background: linear-gradient(90deg, rgba(6, 10, 16, .92) 0%, rgba(6, 10, 16, .72) 42%, rgba(6, 10, 16, .1) 75%), var(--signup-bg) center / cover no-repeat;
-    box-shadow: 0 0 0 1px var(--line); }
-  .signup__txt { position: relative; max-width: 470px; padding: 44px 40px; }
+    background: var(--bg); box-shadow: 0 0 0 1px var(--line); }
+  .signup__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .signup__box::before { content: ''; position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(90deg, rgba(6, 10, 16, .92) 0%, rgba(6, 10, 16, .72) 42%, rgba(6, 10, 16, .1) 75%); }
+  .signup__txt { position: relative; z-index: 2; max-width: 470px; padding: 44px 40px; }
   .signup__txt h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin-bottom: .35em; }
   .signup__txt > p { color: var(--fg); margin-bottom: 22px; }
   .signup__form { display: flex; align-items: flex-end; gap: 10px; border-bottom: 1px solid rgba(255, 255, 255, .45); padding-bottom: 8px; }
@@ -167,7 +171,9 @@ const bg = '/img/home/signup-lake-house.webp';
   }
   @media (max-width: 640px) {
     .signup { margin-top: 48px; }
-    .signup__box { min-height: 0; background: linear-gradient(180deg, rgba(6, 10, 16, .55), rgba(6, 10, 16, .94) 55%), var(--signup-bg) center top / cover no-repeat; }
+    .signup__box { min-height: 0; }
+    .signup__bg { object-position: center top; }
+    .signup__box::before { background: linear-gradient(180deg, rgba(6, 10, 16, .55), rgba(6, 10, 16, .94) 55%); }
     .signup__txt { padding: 120px 22px 28px; }
     .ftr { padding-top: 48px; }
     .ftr__in { grid-template-columns: 1fr; gap: 0; }

@@ -33,19 +33,26 @@ const ld = [
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="preconnect" href="https://connect.facebook.net" />
-  <link rel="preconnect" href="https://www.clarity.ms" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <script is:inline define:vars={{ pixelId: SITE.metaPixelId, clarityId: SITE.clarityId, pageType }}>
     window.VESPRO = { pixelId, clarityId, pageType };
+    // Pixel do Meta e Clarity: a fila (fbq, clarity) existe desde já, então nenhum evento se perde; os scripts deles
+    // (cerca de 270 KB) só são baixados 1,5 s depois do carregamento, para não atrasar a imagem principal no celular.
+    var later = [];
     if (pixelId) {
-      !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+      !function(f){if(f.fbq)return;var n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}(window);
       fbq('init', pixelId); fbq('track', 'PageView');
+      later.push('https://connect.facebook.net/en_US/fbevents.js');
     }
     if (clarityId) {
-      (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src='https://www.clarity.ms/tag/'+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,'clarity','script',clarityId);
+      window.clarity = window.clarity || function(){(window.clarity.q=window.clarity.q||[]).push(arguments)};
       window.clarity('set', 'site', 'brand');
       window.clarity('set', 'page_type', pageType);
+      later.push('https://www.clarity.ms/tag/' + clarityId);
     }
+    var loadLater = function () { setTimeout(function () { later.forEach(function (src) { var s = document.createElement('script'); s.async = true; s.src = src; document.head.appendChild(s); }); }, 1500); };
+    if (document.readyState === 'complete') loadLater(); else window.addEventListener('load', loadLater);
   </script>
   <title>{page.title}</title>
   <meta name="description" content={page.description} />

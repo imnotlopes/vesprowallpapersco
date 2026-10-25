@@ -24,13 +24,15 @@ const FL = [
   <div class="wrap hero__head">
     <h1>Turn your screen into a <em class="serif">painting</em></h1>
   </div>
+  <!-- faixa decorativa: no celular o sizes de 150px faz o navegador pegar a prévia de 400 px mesmo em tela 3x (a de 800 pesava 3x mais) -->
   <div class="hero__rail" aria-hidden="true">
     <div class="marquee" data-marquee="60">
       <div class="marquee__track">
         {[0, 1].map((copy) => pairs.map((w, i) => (
           <div class="dev">
             <div class="dev__laptop">
-              <div class="dev__screen"><img src={preview(w, 800)} alt="" width="800" height="450" loading={copy === 0 && i < 3 ? 'eager' : 'lazy'} decoding="async" /></div>
+              <div class="dev__screen"><img src={preview(w, 800)} srcset={`${preview(w, 400)} 400w, ${preview(w, 800)} 800w`} sizes="(max-width: 640px) 150px, 380px"
+                alt="" width="800" height="450" loading={copy === 0 && i < 3 ? 'eager' : 'lazy'} fetchpriority={copy === 0 && i === 0 ? 'high' : undefined} decoding="async" /></div>
               <div class="dev__base"></div>
             </div>
             <div class="dev__phone"><img src={preview(w, 400)} alt="" width="400" height="225" loading="lazy" decoding="async" /></div>
