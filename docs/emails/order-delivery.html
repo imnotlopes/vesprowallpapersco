@@ -1,0 +1,59 @@
+<!doctype html>
+<!-- Klaviyo: template "Order delivery" (fluxo Order delivery, gatilho Placed Order). Assunto: Your VESPRO™ wallpapers are ready to download
+     Pré-visualização: Your paintings are one click away. Download links inside.
+     Os itens vêm do evento enviado por api/stripe-webhook.js: event.Items[] com ProductName e DownloadLink.
+     O link de descadastro fica enquanto o e-mail não puder ser marcado como transacional; sem endereço no rodapé (regra do projeto). -->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Your VESPRO™ wallpapers are ready to download</title>
+</head>
+<body style="margin:0;padding:0;background:#e9e6e0;">
+  <div style="display:none;max-height:0;overflow:hidden;">Your paintings are one click away. Download links inside.</div>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#e9e6e0;padding:16px 12px 40px;">
+    <tr><td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#060a10;border-radius:16px;overflow:hidden;font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif;">
+        <tr><td align="center" style="padding:32px 32px 8px;">
+          <img src="https://www.vesprowallpapers.com/img/brand/apple-touch-icon.png" width="64" height="64" alt="VESPRO" style="display:block;border:0;border-radius:14px;" />
+        </td></tr>
+        <tr><td align="center" style="padding:16px 40px 4px;">
+          <p style="margin:0 0 10px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#d9b878;font-weight:700;">Order confirmed</p>
+          <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-weight:400;font-size:34px;line-height:1.15;color:#ffffff;">Your screen, <em style="color:#d9b878;">painted</em>.</h1>
+        </td></tr>
+        <tr><td align="center" style="padding:14px 44px 26px;">
+          <p style="margin:0;font-size:15px;line-height:1.6;color:#d9d9d9;">Thank you for your order. Your wallpapers are ready: each button opens a Google Drive folder with the files in full resolution. Download them to your computer, then set your favorite as your wallpaper.</p>
+        </td></tr>
+        <tr><td style="padding:0 32px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b1118;border-radius:12px;border:1px solid #1d2530;">
+            {% for item in event.Items %}
+            <tr><td style="padding:18px 20px;{% if not forloop.last %}border-bottom:1px solid #1d2530;{% endif %}">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td style="font-size:15px;color:#ffffff;font-weight:600;">{{ item.ProductName }}<br /><span style="font-size:12px;color:#a6a6a6;font-weight:400;">Full-resolution files in a Google Drive folder</span></td>
+                <td align="right" width="130"><a href="{{ item.DownloadLink }}" style="display:inline-block;padding:11px 20px;border-radius:999px;background:#d9b878;color:#060a10;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;text-decoration:none;">Download</a></td>
+              </tr></table>
+            </td></tr>
+            {% endfor %}
+          </table>
+        </td></tr>
+        <tr><td style="padding:28px 40px 6px;">
+          <p style="margin:0 0 12px;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#d9b878;font-weight:700;">Set it in 30 seconds</p>
+          <p style="margin:0 0 8px;font-size:14px;line-height:1.55;color:#d9d9d9;"><b style="color:#fff;">Mac:</b> System Settings, Wallpaper, Add Photo, then pick the painting.</p>
+          <p style="margin:0 0 8px;font-size:14px;line-height:1.55;color:#d9d9d9;"><b style="color:#fff;">Windows:</b> right-click the file and choose Set as desktop background.</p>
+          <p style="margin:0;font-size:14px;line-height:1.55;color:#d9d9d9;"><b style="color:#fff;">iPhone:</b> open the Phone folder when your collection has one, save the image to Photos, then Share, Use as Wallpaper.</p>
+        </td></tr>
+        <tr><td style="padding:26px 32px 8px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #6b5c3e;border-radius:12px;">
+            <tr><td style="padding:16px 20px;font-size:13px;line-height:1.55;color:#d9d9d9;">Not what you expected? Reply within 14 days and we refund you in full. A real person reads every reply, usually within one working day.</td></tr>
+          </table>
+        </td></tr>
+        <tr><td align="center" style="padding:24px 40px 34px;">
+          <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#8a8f96;">Personal use license. Lost this email? Get your links again at <a href="https://www.vesprowallpapers.com/get-my-links" style="color:#d9b878;">vesprowallpapers.com/get-my-links</a></p>
+          <p style="margin:0 0 6px;font-size:12px;line-height:1.6;color:#8a8f96;">Questions? Write to <a href="mailto:support@vesprowallpapers.com" style="color:#d9b878;">support@vesprowallpapers.com</a></p>
+          <p style="margin:0;font-size:11px;line-height:1.6;color:#5f646b;">{% unsubscribe 'Unsubscribe from VESPRO™ emails' %}</p>
+        </td></tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>
