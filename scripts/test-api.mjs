@@ -10,6 +10,8 @@ globalThis.fetch = async (url, opt = {}) => {
   calls.push({ url: String(url), method: opt.method || 'GET', body: opt.body, headers: opt.headers || {} });
   const u = String(url);
   const json = (o, status = 200) => ({ ok: status < 400, status, json: async () => o, text: async () => JSON.stringify(o) });
+  if (u.includes('/line_items')) return json({ data: [
+    { description: 'VESPRO™ Tides & Tempests Edition 01', amount_total: 249 }, { description: 'VESPRO™ Metropolis Edition 01', amount_total: 249 }] });
   if (u.includes('/checkout/sessions/search')) return json({ data: [
     { payment_status: 'paid', metadata: { product: 'ocean' } },
     { payment_status: 'paid', metadata: { products: 'cities' } },
@@ -93,6 +95,9 @@ ev = kEvents()[0];
 ok(res.code === 200 && res.body.delivered === true, 'webhook válido entrega o pedido');
 ok(ev && ev.metric.data.attributes.name === 'Placed Order' && ev.profile.data.attributes.email === 'buyer@example.com' && ev.value === 4.98 && ev.unique_id === 'cs_1', 'Placed Order vai para o comprador com valor e id único');
 ok(ev.properties.Items.map((i) => i.DownloadLink).join() === 'https://drive/ocean,https://drive/cities', 'Placed Order leva os links certos de cada pack');
+ok(ev.properties.Items.map((i) => i.Price).join() === '$2.49,$2.49' && ev.properties.Items[0].ImageURL.endsWith('/img/email/ocean.jpg') && ev.properties.Total === '$4.98' && ev.properties.OrderNumber === 'VSP-CS_1', 'Placed Order leva capa, preço de cada item, total e número do pedido para o e-mail');
+const recs = ev.properties.Recommendations;
+ok(recs.length === 3 && recs[0].ProductID === 'complete' && recs[0].Price === '$15.01' && recs[0].URL.includes('upgrade=cs_1') && !recs.some((r) => ['ocean', 'cities'].includes(r.ProductID)), 'ofertas do pedido: Editions com preço de upgrade e coleções que a pessoa ainda não tem');
 res = mkRes(); calls.length = 0; await wh(req({ 'stripe-signature': `t=${t},v1=${'0'.repeat(64)}` }), res);
 ok(res.code === 400 && !calls.length, 'assinatura falsa é recusada e nada é enviado');
 
@@ -101,6 +106,7 @@ const fp = (await import('../api/free-pack.js')).default;
 res = mkRes(); calls.length = 0; await fp({ method: 'POST', body: { email: 'Fan@Example.com', marketing: false, device: 'mac' } }, res);
 ev = kEvents()[0];
 ok(res.body.ok && ev.metric.data.attributes.name === 'Requested Free Pack' && ev.properties.DownloadLink === 'https://drive/free' && ev.profile.data.attributes.email === 'fan@example.com', 'pack grátis registra o evento com o link');
+ok(ev.properties.ImageURL.endsWith('/img/email/free.jpg') && ev.properties.Recommendations[0].Price === '$19.99', 'pack grátis leva a capa e as ofertas (Editions a preço cheio)');
 ok(!kSubs().length, 'sem a caixa marcada, não entra na lista de novidades');
 res = mkRes(); calls.length = 0; await fp({ method: 'POST', body: { email: 'fan@example.com', marketing: true } }, res);
 ok(kSubs().length === 1, 'com a caixa marcada, entra na lista de novidades');
@@ -114,6 +120,7 @@ res = mkRes(); calls.length = 0; await (await import('../api/resend-links.js')).
 ev = kEvents()[0];
 const links = ev ? ev.properties.Items.map((i) => i.DownloadLink).join() : '';
 ok(res.body.ok && ev && ev.metric.data.attributes.name === 'Requested Download Links' && links === 'https://drive/ocean,https://drive/cities', 'reenvio manda só o que foi pago (pedidos antigos e novos)');
+ok(ev.properties.Items[1].ImageURL.endsWith('/img/email/cities.jpg') && ev.properties.Recommendations[0].URL.endsWith('/collections/complete'), 'reenvio leva as capas e as ofertas');
 
 // pedido (Purchase + links na página de obrigado)
 const order = (await import('../api/order.js')).default;

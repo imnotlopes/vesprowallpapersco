@@ -1,0 +1,25 @@
+Hi{% if event.FirstName %}, {{ event.FirstName }}{% endif %}!
+
+Order confirmed: {{ event.OrderNumber }} · {{ event.OrderDate }}
+Thank you for your order. Each link opens a Google Drive folder with your files in full resolution.
+
+{% for item in event.Items %}{{ item.ProductName|safe }}{% if item.Price %} · {{ item.Price }}{% endif %}
+Download: {{ item.DownloadLink|safe }}
+
+{% endfor %}Total paid: {{ event.Total }}
+
+Set it in 30 seconds
+Mac: System Settings, Wallpaper, Add Photo, then pick the painting.
+Windows: right-click the file and choose Set as desktop background.
+iPhone: open the Phone folder when there is one, save the image to Photos, then Share, Use as Wallpaper.
+
+{% if event.Recommendations %}You might also like
+{% for r in event.Recommendations %}VESPRO™ {{ r.Collection|safe }}: {{ r.Price }} ({{ r.Note|safe }})
+{{ r.URL|safe }}
+{% endfor %}
+{% endif %}Not what you expected? Reply within 14 days and we refund you in full.
+
+Need help? My downloads: https://www.vesprowallpapers.com/get-my-links · 14-day guarantee: https://www.vesprowallpapers.com/refunds
+Questions? Reply to this email or write to support@vesprowallpapers.com
+
+{% unsubscribe %}

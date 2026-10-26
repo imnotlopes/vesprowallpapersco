@@ -5,6 +5,7 @@ import { trackEvent, subscribe, validEmail, METRICS } from './_lib/klaviyo.js';
 import { itemsFor } from './_lib/links.js';
 import { FREE_PACK } from './_lib/products.js';
 import { allow, ipOf, jsonBody, MIN, DAY } from './_lib/limit.js';
+import { emailImage, recommendations } from './_lib/email-data.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
@@ -23,7 +24,8 @@ export default async function handler(req, res) {
     if (b.marketing === true) await subscribe({ email, source: 'Free pack' }).catch((e) => console.error(e));
     await trackEvent({
       email, metric: METRICS.free,
-      properties: { DownloadLink: item.link, Device: device, Source: source, MarketingConsent: b.marketing === true },
+      properties: { DownloadLink: item.link, Device: device, Source: source, MarketingConsent: b.marketing === true,
+        ImageURL: emailImage('free'), Recommendations: recommendations() },
       profile: { Device: device, FreePack: true },
     });
     return res.status(200).json({ ok: true });

@@ -5,6 +5,7 @@ import { stripe } from './_lib/stripe.js';
 import { itemsFor } from './_lib/links.js';
 import { orderProducts, normalizeCart } from './_lib/products.js';
 import { trackEvent, validEmail, METRICS } from './_lib/klaviyo.js';
+import { productCard, recommendations } from './_lib/email-data.js';
 import { allow, ipOf, jsonBody, MIN, HOUR } from './_lib/limit.js';
 
 export default async function handler(req, res) {
@@ -24,7 +25,8 @@ export default async function handler(req, res) {
     if (items.length) {
       await trackEvent({ email, metric: METRICS.resend, properties: {
         ItemNames: items.map((i) => i.name),
-        Items: items.map((i) => ({ ProductID: i.key, ProductName: i.name, DownloadLink: i.link })),
+        Items: items.map((i) => ({ ...productCard(i.key), DownloadLink: i.link })),
+        Recommendations: recommendations(keys),
       } });
     }
   } catch (e) {

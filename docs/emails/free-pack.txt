@@ -1,0 +1,21 @@
+Your 12 free wallpapers are here
+
+Thank you for joining us. Here are 12 impasto oil painting wallpapers in full resolution, ready for your desktop, laptop or phone.
+
+Download my 12 wallpapers: {{ event.DownloadLink|safe }}
+
+Set it in 30 seconds
+Mac: System Settings, Wallpaper, Add Photo, then pick the painting.
+Windows: right-click the file and choose Set as desktop background.
+iPhone: open the Phone folder when there is one, save the image to Photos, then Share, Use as Wallpaper.
+
+{% if event.Recommendations %}You might also like
+{% for r in event.Recommendations %}VESPRO™ {{ r.Collection|safe }}: {{ r.Price }} ({{ r.Note|safe }})
+{{ r.URL|safe }}
+{% endfor %}
+{% endif %}Quick question: which screen are you dressing up, Mac, Windows or iPhone? Just reply to this email.
+
+Need help? My downloads: https://www.vesprowallpapers.com/get-my-links · 14-day guarantee: https://www.vesprowallpapers.com/refunds
+Questions? Reply to this email or write to support@vesprowallpapers.com
+
+{% unsubscribe %}

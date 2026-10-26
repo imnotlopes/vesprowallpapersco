@@ -20,3 +20,7 @@ arts/
 stripe.txt
 CONTEXTO.md
 klaviyo.txt
+
+# chaves salvas localmente (nunca vão para o repositório)
+private-api-key.txt
+*.key

@@ -1,0 +1,22 @@
+Here are your links.
+
+You asked for your download links again, so here is everything you have bought from VESPRO™. Each link opens a Google Drive folder with your files in full resolution.
+
+{% for item in event.Items %}{{ item.ProductName|safe }}
+Download: {{ item.DownloadLink|safe }}
+
+{% endfor %}Set it in 30 seconds
+Mac: System Settings, Wallpaper, Add Photo, then pick the painting.
+Windows: right-click the file and choose Set as desktop background.
+iPhone: open the Phone folder when there is one, save the image to Photos, then Share, Use as Wallpaper.
+
+{% if event.Recommendations %}You might also like
+{% for r in event.Recommendations %}VESPRO™ {{ r.Collection|safe }}: {{ r.Price }} ({{ r.Note|safe }})
+{{ r.URL|safe }}
+{% endfor %}
+{% endif %}Did not ask for this? You can ignore this email: download links only go to the address used at checkout.
+
+Need help? My downloads: https://www.vesprowallpapers.com/get-my-links · 14-day guarantee: https://www.vesprowallpapers.com/refunds
+Questions? Reply to this email or write to support@vesprowallpapers.com
+
+{% unsubscribe %}
