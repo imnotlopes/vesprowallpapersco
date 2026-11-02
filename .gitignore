@@ -24,3 +24,4 @@ klaviyo.txt
 # chaves salvas localmente (nunca vão para o repositório)
 private-api-key.txt
 *.key
+.indexnow-state.json

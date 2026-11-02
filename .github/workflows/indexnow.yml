@@ -1,0 +1,35 @@
+# Depois de cada publicação, avisa o Bing das páginas que mudaram (scripts/indexnow.mjs).
+# A rodada agendada mantém a memória da última comparação viva: o GitHub apaga caches sem uso após 7 dias.
+name: IndexNow
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 6 */5 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: .indexnow-state.json
+          key: indexnow-state-${{ github.run_id }}
+          restore-keys: indexnow-state-
+      # tempo para a Vercel publicar; se atrasar, a próxima rodada pega o que faltou
+      - if: github.event_name == 'push'
+        run: sleep 300
+      - run: node scripts/indexnow.mjs
