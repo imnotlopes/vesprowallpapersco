@@ -1,4 +1,4 @@
-// Redes sociais (rodapé e menu do celular). url vazia = ainda não criada: o ícone aparece, sem link.
+// Redes sociais (rodapé, menu do celular, contato e Our Story). url vazia = ainda não criada: o ícone aparece, sem link.
 import { SITE } from '../config';
 export const SOCIAL = [
   { name: 'Instagram', ...SITE.instagram, svg: '<g fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/></g><circle cx="17.4" cy="6.6" r="1.1" fill="currentColor"/>' },

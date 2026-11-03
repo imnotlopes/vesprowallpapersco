@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import Community from '../components/home/Community.astro';
 import { PAGES } from '../data/pages';
 import { SITE } from '../config';
+import { SOCIAL } from '../data/social';
 import { WALLPAPERS, preview, EDITIONS_LABEL } from '../data/wallpapers';
 import { PRODUCTS } from '../../api/_lib/products.js';
 
@@ -149,7 +150,9 @@ const beliefs = [
           <li><b>Snap your screen</b><span>Desk, lock screen, a whole setup. Any angle works.</span></li>
           <li><b>Share it with us</b><span>Tag <a href={SITE.instagram.url} target="_blank" rel="noopener">{SITE.instagram.handle}</a> on Instagram or email it to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. Our favorites join the wall above.</span></li>
         </ol>
-        <a class="btn btn--ghost" href={SITE.instagram.url} target="_blank" rel="noopener">Follow {SITE.instagram.handle}</a>
+        <div class="ab-follow">
+          {SOCIAL.map((s) => <a class="btn btn--ghost" href={s.url} target="_blank" rel="noopener">{s.name} {s.handle}</a>)}
+        </div>
       </div>
     </div>
   </section>
@@ -231,6 +234,8 @@ const beliefs = [
   .ab-join b { font-weight: 600; color: var(--fg); }
   .ab-join span { font-size: .92rem; color: var(--muted); line-height: 1.6; }
   .ab-join a:not(.btn) { color: var(--soft); }
+  .ab-follow { display: flex; flex-wrap: wrap; gap: 10px; }
+  .ab-follow .btn { flex: 1 1 auto; }
 
   .ab-end h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
   .ab-end__cta { display: flex; gap: 12px; justify-content: center; margin-top: 24px; }

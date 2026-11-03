@@ -7,9 +7,8 @@ export const SITE = {
     'Hand-finished impasto oil painting wallpapers in 4K for MacBook, PC, iPhone and ultrawide monitors. Instant download, personal license.',
   email: 'support@vesprowallpapers.com',
   instagram: { handle: '@vesprowallpapers.co', url: 'https://www.instagram.com/vesprowallpapers.co/' },
-  // redes do rodapé: TikTok e Facebook ainda vão ser criados; com url vazia o ícone aparece sem link
-  tiktok: { handle: '', url: '' },
-  facebook: { handle: '', url: '' },
+  tiktok: { handle: '@vesprowallpapers', url: 'https://www.tiktok.com/@vesprowallpapers' },
+  facebook: { handle: 'VesproWallpapers', url: 'https://www.facebook.com/profile.php?id=61595295119122' },
   locale: 'en',
   ogImage: '/img/previews/d29.webp',
   metaPixelId: '1665089428567245',
