@@ -273,6 +273,144 @@ EMAILS = {
     },
 }
 
+# Sequência de boas-vindas (gatilho: entrou na lista VESPRO™ Newsletter). Quem entra pode ter vindo do pack grátis, do rodapé
+# ou do carrinho, então o texto não supõe que a pessoa pegou o pack. Sem evento: nada de {{ event.* }} aqui.
+# Preços e contagens abaixo são fixos no texto: conferir com api/_lib/products.js quando mudarem.
+def utm(path, n):
+    return f'{SITE}{path}?utm_source=klaviyo&utm_medium=email&utm_campaign=welcome&utm_content=email-{n}'
+
+
+def picture(href, name, alt):
+    return f'''        <tr><td style="padding:20px 32px 0;">
+          <a href="{href}"><img src="{SITE}/img/email/{name}.jpg" width="536" alt="{alt}" style="display:block;width:100%;height:auto;border:0;border-radius:10px;" /></a>
+        </td></tr>
+'''
+
+
+def cta(href, label):
+    return f'''        <tr><td align="center" style="padding:22px 32px 0;">{button(href, label)}</td></tr>
+'''
+
+
+def passage(title, body):
+    return section_title(title, '24px 32px 6px') + f'''        <tr><td style="padding:0 32px;">
+          <p style="margin:0;font-size:14px;line-height:1.65;color:{TEXT};">{body}</p>
+        </td></tr>
+'''
+
+
+def checklist(lines):
+    rows_ = ''.join(f'<p style="margin:0 0 8px;font-size:14px;line-height:1.55;color:{TEXT};"><span style="color:{GOLD};">&#10003;</span>&nbsp; {l}</p>' for l in lines)
+    return f'''        <tr><td style="padding:20px 32px 0;">{rows_}</td></tr>
+'''
+
+
+def collections(cards, n):
+    """Coleções em duas colunas: capa, nome, frase curta e preço."""
+    def card(c):
+        href = utm(c['path'], n)
+        return f'''<td width="50%" valign="top" style="padding:0 5px 22px;">
+                <a href="{href}"><img src="{SITE}/img/email/{c['img']}.jpg" width="258" alt="" style="display:block;width:100%;height:auto;border:0;border-radius:8px;" /></a>
+                <p style="margin:10px 0 3px;font-size:14px;line-height:1.3;color:#ffffff;font-weight:600;">{c['name']}</p>
+                <p style="margin:0 0 6px;font-size:12px;line-height:1.45;color:{MUTED};">{c['note']}</p>
+                <p style="margin:0 0 8px;font-size:13px;color:{GOLD};font-weight:700;">{c['price']}</p>
+                <a href="{href}" style="font-size:12px;font-weight:700;color:#ffffff;text-decoration:underline;">See collection &rsaquo;</a>
+              </td>'''
+    trs = ''.join('<tr>' + ''.join(card(c) for c in cards[i:i + 2]) + '</tr>' for i in range(0, len(cards), 2))
+    return f'''        <tr><td style="padding:16px 27px 0;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0">{trs}</table>
+        </td></tr>
+'''
+
+
+FOLLOW = (f'Instagram <a href="https://www.instagram.com/vesprowallpapers.co/" style="color:{GOLD};">@vesprowallpapers.co</a> &nbsp;·&nbsp; '
+          f'TikTok <a href="https://www.tiktok.com/@vesprowallpapers" style="color:{GOLD};">@vesprowallpapers</a> &nbsp;·&nbsp; '
+          f'<a href="https://www.facebook.com/profile.php?id=61595295119122" style="color:{GOLD};">Facebook</a>')
+TEXT_FOLLOW = ('Follow along\nInstagram @vesprowallpapers.co: https://www.instagram.com/vesprowallpapers.co/\n'
+               'TikTok @vesprowallpapers: https://www.tiktok.com/@vesprowallpapers\n'
+               'Facebook: https://www.facebook.com/profile.php?id=61595295119122\n\n')
+TEXT_END = 'Questions? Reply to this email or write to support@vesprowallpapers.com\n\n{% unsubscribe %}'
+LIST_NOTE = 'You are receiving this because you asked for new VESPRO™ releases and early access.'
+
+CARDS = [
+    {'img': 'shadows', 'path': '/collections/shadows', 'name': 'VESPRO™ Shadows', 'note': 'Reworked in black and white, for dark mode and minimal setups.', 'price': '$4.99'},
+    {'img': 'cars', 'path': '/wallpapers/cars', 'name': 'VESPRO™ Grand Touring', 'note': 'Sports cars, classics and the wild things riding in them.', 'price': '$2.49'},
+    {'img': 'ocean', 'path': '/wallpapers/ocean', 'name': 'VESPRO™ Tides &amp; Tempests', 'note': 'Giant waves, tall ships and open water.', 'price': '$2.49'},
+    {'img': 'cities', 'path': '/wallpapers/cities', 'name': 'VESPRO™ Metropolis', 'note': 'Rainy streets, old-world avenues and skyline nights.', 'price': '$2.49'},
+]
+
+EMAILS.update({
+    'welcome-1': {
+        'meta': 'Klaviyo: fluxo Welcome (gatilho entrou na lista VESPRO™ Newsletter), e-mail 1, dia 2. Assunto: Why thick paint looks so good on a flat screen',
+        'html': head('Why thick paint looks so good on a flat screen', 'The old technique behind every VESPRO™ wallpaper.')
+        + topbar('Welcome', 'VESPRO™') + LOGO
+        + hero('Welcome to VESPRO™', 'Your screen deserves <em style="color:#d9b878;">a painting</em>',
+               'Thanks for joining us. Think about how many hours your eyes rest on a screen. We wanted it to feel closer to a painting on a wall, so we started painting wallpapers.')
+        + picture(utm('/collections/signature', 1), 'signature', 'Portofino Harbour, a VESPRO oil painting wallpaper')
+        + passage('Why impasto', 'Impasto is the old technique of laying paint on so thick that it keeps the shape of the brush. It has ridges, edges and small happy accidents. On a bright, flat screen, that texture gives your eye somewhere to rest.')
+        + passage('Made for your screen', 'Each painting is composed for a 16:9 screen first, so nothing important hides behind your icons, your dock or your menu bar.')
+        + cta(utm('/collections/signature', 1), 'See the Signature collection')
+        + boxed(f'<b style="color:#fff;">Share your setup.</b> Which painting is on your screen right now? Reply with a photo, or tag us. We read every message.<br /><br />{FOLLOW}')
+        + footer(LIST_NOTE),
+        'text': ('Your screen deserves a painting\n\nThanks for joining us. Think about how many hours your eyes rest on a screen. '
+                 'We wanted it to feel closer to a painting on a wall, so we started painting wallpapers.\n\n'
+                 'Why impasto\nImpasto is the old technique of laying paint on so thick that it keeps the shape of the brush. It has ridges, edges and small happy accidents. '
+                 'On a bright, flat screen, that texture gives your eye somewhere to rest.\n\n'
+                 'Made for your screen\nEach painting is composed for a 16:9 screen first, so nothing important hides behind your icons, your dock or your menu bar.\n\n'
+                 f'See the Signature collection: {utm("/collections/signature", 1)}\n\n'
+                 'Share your setup. Which painting is on your screen right now? Reply with a photo, or tag us. We read every message.\n\n'
+                 + TEXT_FOLLOW + LIST_NOTE + '\n' + TEXT_END),
+    },
+    'welcome-2': {
+        'meta': 'Klaviyo: fluxo Welcome, e-mail 2, dia 4. Assunto: Pick a mood for your screen',
+        'html': head('Pick a mood for your screen', 'Dark mode, sports cars, open sea or city nights.')
+        + topbar('Pick a mood', 'VESPRO™') + LOGO
+        + hero('Our collections', 'Pick a <em style="color:#d9b878;">mood</em> for your screen',
+               'We release our work the way printmakers do, in editions. Each one has a name, a theme and a mood. Here are four places to start.')
+        + collections(CARDS, 2)
+        + cta(utm('/wallpapers', 2), 'See every collection')
+        + divider() + setup()
+        + help_grid()
+        + footer(LIST_NOTE),
+        'text': ('Pick a mood for your screen\n\nWe release our work the way printmakers do, in editions. Each one has a name, a theme and a mood. Here are four places to start.\n\n'
+                 + ''.join(f"{c['name'].replace('&amp;', '&')}: {c['price']}\n{c['note']}\n{utm(c['path'], 2)}\n\n" for c in CARDS)
+                 + f'See every collection: {utm("/wallpapers", 2)}\n\n' + TEXT_SETUP
+                 + LIST_NOTE + '\n' + TEXT_END),
+    },
+    'welcome-3': {
+        'meta': 'Klaviyo: fluxo Welcome, e-mail 3, dia 7. Assunto: Every painting we have made, one price',
+        'html': head('Every painting we have made, one price', '150+ wallpapers, plus every new edition. Pay once.')
+        + topbar('VESPRO™ Editions', '$19.99') + LOGO
+        + hero('VESPRO™ Editions', 'Every painting. <em style="color:#d9b878;">One price.</em>',
+               'If you could not pick just one mood, this is the easy answer: every painting we have made, 150+ so far, plus every edition we release from now on.')
+        + picture(utm('/collections/complete', 3), 'complete', 'Four paintings from the VESPRO Editions collection')
+        + checklist(['All 9 collections plus exclusive paintings you will not find in any collection',
+                     'Every new edition added at no extra cost, through the same download link',
+                     'Almost all in 4K (3840 x 2160); the Sporting collection is in HD',
+                     'Pay once and keep the files for life. No subscription',
+                     '14-day money-back guarantee'])
+        + f'''        <tr><td align="center" style="padding:14px 32px 0;">
+          <p style="margin:0;font-size:26px;font-family:{SERIF};color:#ffffff;">$19.99</p>
+          <p style="margin:4px 0 0;font-size:12px;color:{MUTED};">The 9 collections cost $31.91 bought one by one</p>
+        </td></tr>
+'''
+        + cta(utm('/collections/complete', 3), 'See VESPRO™ Editions')
+        + boxed('Not sure yet? Reply to this email with your screen and the kind of paintings you like, and a real person will point you to the right collection.')
+        + help_grid()
+        + footer(LIST_NOTE),
+        'text': ('Every painting. One price.\n\nIf you could not pick just one mood, this is the easy answer: every painting we have made, 150+ so far, plus every edition we release from now on.\n\n'
+                 '- All 9 collections plus exclusive paintings you will not find in any collection\n'
+                 '- Every new edition added at no extra cost, through the same download link\n'
+                 '- Almost all in 4K (3840 x 2160); the Sporting collection is in HD\n'
+                 '- Pay once and keep the files for life. No subscription\n'
+                 '- 14-day money-back guarantee\n\n'
+                 '$19.99 (the 9 collections cost $31.91 bought one by one)\n'
+                 f'See VESPRO™ Editions: {utm("/collections/complete", 3)}\n\n'
+                 'Not sure yet? Reply to this email with your screen and the kind of paintings you like, and a real person will point you to the right collection.\n\n'
+                 + LIST_NOTE + '\n' + TEXT_END),
+    },
+})
+
 os.makedirs(OUT, exist_ok=True)
 for name, e in EMAILS.items():
     html = e['html'].replace('<!doctype html>\n', f'<!doctype html>\n<!-- {e["meta"]}\n     Gerado por scripts/emails.py: edite lá e rode de novo. -->\n', 1)

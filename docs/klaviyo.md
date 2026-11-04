@@ -74,7 +74,8 @@ do Stripe, ou peça o pack grátis com seu e-mail, antes de montar o fluxo.
 - O evento só existe para quem marcou a caixa de consentimento no carrinho.
 
 ### E) Boas-vindas da newsletter: trigger "Added to list" VESPRO™ Newsletter
-- Fica para a etapa 5 (sequência de e-mails).
+- Fluxo `XjGH8t`, ativo desde 04/11/2026. Dia 2, dia 4 e dia 7 (modelos `docs/emails/welcome-*.html`). Sai do fluxo quem tem `Placed Order`.
+- Só recebe quem marcou a caixa de novidades, porque só essas pessoas entram na lista.
 
 ## 4. Variáveis na Vercel
 
