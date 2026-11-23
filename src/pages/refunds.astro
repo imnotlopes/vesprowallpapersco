@@ -3,7 +3,25 @@ import Legal from '../components/Legal.astro';
 import { PAGES } from '../data/pages';
 import { SITE } from '../config';
 ---
-<Legal page={PAGES.refunds} heading="Refund policy" updated="October 2026">
-  <p>If your download doesn't work, or the wallpapers aren't what you expected, email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> within 14 days of purchase with your order email and we'll refund you in full.</p>
-  <p>Refunds are sent to the original payment method. Processing times depend on your bank.</p>
+<Legal page={PAGES.refunds} heading="Refund policy" updated="November 2026">
+  <p>Every purchase comes with a <strong>14-day money-back guarantee</strong>. If your download doesn't work, or the wallpapers aren't what you expected, for any reason, including a change of mind, we refund you in full.</p>
+
+  <h2>How to ask for a refund</h2>
+  <ul>
+    <li>Email <a href={`mailto:${SITE.email}`}>{SITE.email}</a> within 14 days of your purchase.</li>
+    <li>Write from, or tell us, the email you used at checkout so we can find your order.</li>
+    <li>You don't need to give a reason, and there is nothing to send back: digital files can't be returned.</li>
+  </ul>
+
+  <h2>What happens next</h2>
+  <ul>
+    <li>A real person replies within one working day, Monday to Friday.</li>
+    <li>The refund goes back to your original payment method, in full. There are no fees.</li>
+    <li>Banks usually show the refund within 5 to 10 business days.</li>
+  </ul>
+
+  <h2>Exchanges</h2>
+  <p>We don't do exchanges. If you would rather have a different collection, we refund the first one and you buy the one you want.</p>
+
+  <p>For how and when your files are delivered, see our <a href="/shipping">delivery policy</a>.</p>
 </Legal>

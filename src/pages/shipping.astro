@@ -1,0 +1,33 @@
+---
+// Política de entrega (pedida pelo Google Merchant Center: prazo e forma de entrega claros, mesmo para produto digital).
+// Fica fora do PAGES de src/data/pages.ts de propósito, para não misturar com mudanças locais desse arquivo.
+import Legal from '../components/Legal.astro';
+import { SITE } from '../config';
+const page = {
+  path: '/shipping',
+  title: 'Delivery Policy: Instant Digital Download | VESPRO™',
+  description: 'How VESPRO™ wallpapers are delivered: instant digital download right after payment, free worldwide, with the links also sent by email.',
+  keyword: '',
+  indexable: true,
+  priority: 0.2,
+};
+---
+<Legal page={page} heading="Delivery policy" updated="November 2026">
+  <p>Every VESPRO™ product is a digital download. Nothing is shipped physically, so there are no shipping fees, no customs and no waiting for a parcel.</p>
+
+  <h2>When you receive your files</h2>
+  <ul>
+    <li><strong>Instantly.</strong> Right after payment, the thank-you page shows a download button for each collection you bought.</li>
+    <li><strong>By email.</strong> The same download links are sent to the email you used at checkout. It usually takes less than a minute.</li>
+    <li><strong>Anytime later.</strong> Lost the email? Get every link again on <a href="/get-my-links">My downloads</a> with the email you bought with.</li>
+  </ul>
+
+  <h2>Where we deliver</h2>
+  <p>Worldwide, at no cost. Prices are shown in US dollars and taxes, if any apply in your country, are shown at checkout.</p>
+
+  <h2>What you receive</h2>
+  <p>High resolution image files of the collection you bought, delivered through download links. The resolution of each collection is listed on its product page. Previews on the site are watermarked and smaller; the files you receive are full resolution and unwatermarked.</p>
+
+  <h2>If something goes wrong</h2>
+  <p>Nothing in your inbox after 10 minutes? Check spam or promotions, use <a href="/get-my-links">My downloads</a>, or write to <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. A real person replies within one working day, Monday to Friday. If a file doesn't work, we fix it or refund you under our <a href="/refunds">refund policy</a>.</p>
+</Legal>

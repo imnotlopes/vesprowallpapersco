@@ -52,6 +52,7 @@ export const FOOTER = [
       { href: '/contact', label: 'Contact' },
       { href: '/get-my-links', label: 'My downloads' },
       { href: '/refunds', label: '14-day guarantee' },
+      { href: '/shipping', label: 'Delivery' },
       { href: '/license', label: 'License' },
       { href: '/macbook-wallpapers', label: 'MacBook wallpapers' },
       { href: '/4k-desktop-wallpapers', label: '4K desktop wallpapers' },
